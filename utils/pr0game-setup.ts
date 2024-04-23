@@ -2,7 +2,7 @@ import { firefox } from 'playwright';
 import { devices, expect, Page } from 'playwright/test';
 import { CustomBrowserContextOptions } from './customTypes';
 
-async function randomDelay(page: Page) {
+export async function randomDelay(page: Page) {
   await page.waitForTimeout(getRandomMilisecondDelayBetweenSeconds(1, 5));
 }
 
