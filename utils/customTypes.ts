@@ -6,3 +6,20 @@ export const CustomBrowserContextOptions = {
   timezoneId: 'Europe/Berlin',
   colorScheme: 'dark'
 };
+
+export type Building = {
+  order: number;
+  name: string;
+  level: number;
+  cost: {
+    met: number;
+    kris: number;
+    deut: number;
+    energy: number | null;
+    energyProduction?: number;
+    totalEnergyProduction?: number;
+    totalEnergyConsumption?: number;
+  };
+  hasBeenQueued: boolean;
+  queuedAt: Date | null;
+};

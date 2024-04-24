@@ -1,0 +1,15 @@
+# TODO List for [Your Project Name]
+
+## Unfinished Tasks
+
+### High Prio
+- Reinitialize Session after timeout within any interaction. Maybe by catching the error and calling the setup again.
+
+### Medium Prio
+- asd
+
+### Low Prio
+- asd
+
+### Bug Fixes
+- asd
