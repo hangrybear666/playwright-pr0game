@@ -1,0 +1,762 @@
+[
+  {
+    "order": 0,
+    "name": "Solarkraftwerk",
+    "level": 1,
+    "cost": {
+      "met": 75,
+      "kris": 30,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 22,
+      "totalEnergyProduction": 22
+    },
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-25T08:42:01.086Z"
+  },
+  {
+    "order": 1,
+    "name": "Metallmine",
+    "level": 1,
+    "cost": {
+      "met": 60,
+      "kris": 15,
+      "deut": 0,
+      "energy": 11,
+      "totalEnergyConsumption": 11
+    },
+    "hasBeenQueued": false,
+    "queuedAt": "2024-04-25T20:07:38.525Z"
+  },
+  {
+    "order": 2,
+    "name": "Metallmine",
+    "level": 2,
+    "cost": {
+      "met": 90,
+      "kris": 23,
+      "deut": 0,
+      "energy": 13,
+      "totalEnergyConsumption": 24
+    },
+    "hasBeenQueued": false,
+    "queuedAt": "2024-04-25T20:09:46.908Z"
+  },
+  {
+    "order": 3,
+    "name": "Solarkraftwerk",
+    "level": 2,
+    "cost": {
+      "met": 113,
+      "kris": 45,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 26,
+      "totalEnergyProduction": 48
+    },
+    "hasBeenQueued": false,
+    "queuedAt": "2024-04-25T20:05:21.509Z"
+  },
+  {
+    "order": 4,
+    "name": "Metallmine",
+    "level": 3,
+    "cost": {
+      "met": 135,
+      "kris": 34,
+      "deut": 0,
+      "energy": 16,
+      "totalEnergyConsumption": 40
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 5,
+    "name": "Metallmine",
+    "level": 4,
+    "cost": {
+      "met": 203,
+      "kris": 51,
+      "deut": 0,
+      "energy": 19,
+      "totalEnergyConsumption": 59
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 6,
+    "name": "Solarkraftwerk",
+    "level": 3,
+    "cost": {
+      "met": 169,
+      "kris": 68,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 32,
+      "totalEnergyProduction": 80
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 7,
+    "name": "Kristallmine",
+    "level": 1,
+    "cost": {
+      "met": 48,
+      "kris": 24,
+      "deut": 0,
+      "energy": 11,
+      "totalEnergyConsumption": 11
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 8,
+    "name": "Solarkraftwerk",
+    "level": 4,
+    "cost": {
+      "met": 253,
+      "kris": 101,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 37,
+      "totalEnergyProduction": 117
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 9,
+    "name": "Metallmine",
+    "level": 5,
+    "cost": {
+      "met": 304,
+      "kris": 76,
+      "deut": 0,
+      "energy": 22,
+      "totalEnergyConsumption": 81
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 10,
+    "name": "Kristallmine",
+    "level": 2,
+    "cost": {
+      "met": 77,
+      "kris": 38,
+      "deut": 0,
+      "energy": 13,
+      "totalEnergyConsumption": 24
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 11,
+    "name": "Kristallmine",
+    "level": 3,
+    "cost": {
+      "met": 123,
+      "kris": 61,
+      "deut": 0,
+      "energy": 16,
+      "totalEnergyConsumption": 40
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 12,
+    "name": "Solarkraftwerk",
+    "level": 5,
+    "cost": {
+      "met": 380,
+      "kris": 152,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 44,
+      "totalEnergyProduction": 161
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 13,
+    "name": "Deuteriumsynthetisierer",
+    "level": 1,
+    "cost": {
+      "met": 225,
+      "kris": 75,
+      "deut": 0,
+      "energy": 22,
+      "totalEnergyConsumption": 22
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 14,
+    "name": "Kristallmine",
+    "level": 4,
+    "cost": {
+      "met": 197,
+      "kris": 98,
+      "deut": 0,
+      "energy": 19,
+      "totalEnergyConsumption": 59
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 15,
+    "name": "Solarkraftwerk",
+    "level": 6,
+    "cost": {
+      "met": 570,
+      "kris": 228,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 52,
+      "totalEnergyProduction": 213
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 16,
+    "name": "Metallmine",
+    "level": 6,
+    "cost": {
+      "met": 456,
+      "kris": 114,
+      "deut": 0,
+      "energy": 25,
+      "totalEnergyConsumption": 106
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 17,
+    "name": "Metallmine",
+    "level": 7,
+    "cost": {
+      "met": 683,
+      "kris": 171,
+      "deut": 0,
+      "energy": 30,
+      "totalEnergyConsumption": 136
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 18,
+    "name": "Solarkraftwerk",
+    "level": 7,
+    "cost": {
+      "met": 854,
+      "kris": 342,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 60,
+      "totalEnergyProduction": 273
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 19,
+    "name": "Kristallmine",
+    "level": 5,
+    "cost": {
+      "met": 315,
+      "kris": 157,
+      "deut": 0,
+      "energy": 22,
+      "totalEnergyConsumption": 81
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 20,
+    "name": "Deuteriumsynthetisierer",
+    "level": 2,
+    "cost": {
+      "met": 338,
+      "kris": 113,
+      "deut": 0,
+      "energy": 26,
+      "totalEnergyConsumption": 48
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 21,
+    "name": "Solarkraftwerk",
+    "level": 8,
+    "cost": {
+      "met": 1281,
+      "kris": 513,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 70,
+      "totalEnergyProduction": 343
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 22,
+    "name": "Deuteriumsynthetisierer",
+    "level": 3,
+    "cost": {
+      "met": 506,
+      "kris": 169,
+      "deut": 0,
+      "energy": 32,
+      "totalEnergyConsumption": 80
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 23,
+    "name": "Deuteriumsynthetisierer",
+    "level": 4,
+    "cost": {
+      "met": 759,
+      "kris": 253,
+      "deut": 0,
+      "energy": 37,
+      "totalEnergyConsumption": 117
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 24,
+    "name": "Solarkraftwerk",
+    "level": 9,
+    "cost": {
+      "met": 1922,
+      "kris": 769,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 81,
+      "totalEnergyProduction": 424
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 25,
+    "name": "Deuteriumsynthetisierer",
+    "level": 5,
+    "cost": {
+      "met": 1139,
+      "kris": 380,
+      "deut": 0,
+      "energy": 44,
+      "totalEnergyConsumption": 161
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 26,
+    "name": "Roboterfabrik",
+    "level": 1,
+    "cost": {
+      "met": 400,
+      "kris": 120,
+      "deut": 200,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 27,
+    "name": "Roboterfabrik",
+    "level": 2,
+    "cost": {
+      "met": 800,
+      "kris": 240,
+      "deut": 400,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 28,
+    "name": "Forschungslabor",
+    "level": 1,
+    "cost": {
+      "met": 200,
+      "kris": 400,
+      "deut": 200,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 29,
+    "name": "Raumschiffwerft",
+    "level": 1,
+    "cost": {
+      "met": 400,
+      "kris": 200,
+      "deut": 100,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 30,
+    "name": "Kristallmine",
+    "level": 6,
+    "cost": {
+      "met": 503,
+      "kris": 252,
+      "deut": 0,
+      "energy": 25,
+      "totalEnergyConsumption": 106
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 31,
+    "name": "Raumschiffwerft",
+    "level": 2,
+    "cost": {
+      "met": 800,
+      "kris": 400,
+      "deut": 200,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 32,
+    "name": "Solarkraftwerk",
+    "level": 10,
+    "cost": {
+      "met": 2883,
+      "kris": 1153,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 95,
+      "totalEnergyProduction": 519
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 33,
+    "name": "Deuteriumsynthetisierer",
+    "level": 6,
+    "cost": {
+      "met": 1709,
+      "kris": 570,
+      "deut": 0,
+      "energy": 52,
+      "totalEnergyConsumption": 213
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 34,
+    "name": "Metallmine",
+    "level": 8,
+    "cost": {
+      "met": 1025,
+      "kris": 256,
+      "deut": 0,
+      "energy": 35,
+      "totalEnergyConsumption": 171
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 35,
+    "name": "Solarkraftwerk",
+    "level": 11,
+    "cost": {
+      "met": 4325,
+      "kris": 1730,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 109,
+      "totalEnergyProduction": 628
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 36,
+    "name": "Kristallmine",
+    "level": 7,
+    "cost": {
+      "met": 805,
+      "kris": 403,
+      "deut": 0,
+      "energy": 30,
+      "totalEnergyConsumption": 136
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 37,
+    "name": "Metallmine",
+    "level": 9,
+    "cost": {
+      "met": 1538,
+      "kris": 384,
+      "deut": 0,
+      "energy": 41,
+      "totalEnergyConsumption": 212
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 38,
+    "name": "Metallmine",
+    "level": 10,
+    "cost": {
+      "met": 2307,
+      "kris": 577,
+      "deut": 0,
+      "energy": 47,
+      "totalEnergyConsumption": 259
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 39,
+    "name": "Solarkraftwerk",
+    "level": 12,
+    "cost": {
+      "met": 6487,
+      "kris": 2595,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 125,
+      "totalEnergyProduction": 753
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 40,
+    "name": "Kristallmine",
+    "level": 8,
+    "cost": {
+      "met": 1288,
+      "kris": 644,
+      "deut": 0,
+      "energy": 35,
+      "totalEnergyConsumption": 171
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 41,
+    "name": "Deuteriumsynthetisierer",
+    "level": 7,
+    "cost": {
+      "met": 2563,
+      "kris": 854,
+      "deut": 0,
+      "energy": 60,
+      "totalEnergyConsumption": 273
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 42,
+    "name": "Solarkraftwerk",
+    "level": 13,
+    "cost": {
+      "met": 9731,
+      "kris": 3892,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 145,
+      "totalEnergyProduction": 898
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 43,
+    "name": "Metallmine",
+    "level": 11,
+    "cost": {
+      "met": 3460,
+      "kris": 865,
+      "deut": 0,
+      "energy": 55,
+      "totalEnergyConsumption": 314
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 44,
+    "name": "Kristallmine",
+    "level": 9,
+    "cost": {
+      "met": 2062,
+      "kris": 1031,
+      "deut": 0,
+      "energy": 41,
+      "totalEnergyConsumption": 212
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 45,
+    "name": "Metallspeicher",
+    "level": 1,
+    "cost": {
+      "met": 2000,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 46,
+    "name": "Kristallspeicher",
+    "level": 1,
+    "cost": {
+      "met": 2000,
+      "kris": 1000,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 47,
+    "name": "Deuteriumtank",
+    "level": 1,
+    "cost": {
+      "met": 2000,
+      "kris": 2000,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 48,
+    "name": "Solarkraftwerk",
+    "level": 14,
+    "cost": {
+      "met": 14596,
+      "kris": 5839,
+      "deut": 0,
+      "energy": 0,
+      "energyProduction": 165,
+      "totalEnergyProduction": 1063
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 49,
+    "name": "Metallmine",
+    "level": 12,
+    "cost": {
+      "met": 5190,
+      "kris": 1297,
+      "deut": 0,
+      "energy": 63,
+      "totalEnergyConsumption": 377
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 50,
+    "name": "Kristallmine",
+    "level": 10,
+    "cost": {
+      "met": 3299,
+      "kris": 1649,
+      "deut": 0,
+      "energy": 47,
+      "totalEnergyConsumption": 259
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 51,
+    "name": "Deuteriumsynthetisierer",
+    "level": 8,
+    "cost": {
+      "met": 3844,
+      "kris": 1281,
+      "deut": 0,
+      "energy": 70,
+      "totalEnergyConsumption": 343
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 52,
+    "name": "Metallspeicher",
+    "level": 2,
+    "cost": {
+      "met": 4000,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 53,
+    "name": "Kristallspeicher",
+    "level": 2,
+    "cost": {
+      "met": 4000,
+      "kris": 2000,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  }
+]

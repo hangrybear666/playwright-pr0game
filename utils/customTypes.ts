@@ -15,7 +15,7 @@ export type Building = {
     met: number;
     kris: number;
     deut: number;
-    energy: number | null;
+    energy: number;
     energyProduction?: number;
     totalEnergyProduction?: number;
     totalEnergyConsumption?: number;

@@ -14,9 +14,8 @@ function SolarkraftwerkCost(level: number) {
     met: Math.round(50 * Math.pow(1.5, level)),
     kris: Math.round(20 * Math.pow(1.5, level)),
     deut: 0,
-    energy: null,
-    energyProduction:
-      Math.round(20 * level * Math.pow(1.1, level)) - Math.round(20 * (level - 1) * Math.pow(1.1, level - 1)),
+    energy: 0,
+    energyProduction: Math.round(20 * level * Math.pow(1.1, level)) - Math.round(20 * (level - 1) * Math.pow(1.1, level - 1)),
     totalEnergyProduction: Math.round(20 * level * Math.pow(1.1, level))
   };
 }

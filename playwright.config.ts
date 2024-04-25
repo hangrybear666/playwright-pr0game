@@ -13,6 +13,8 @@ require('dotenv').config();
  */
 export default defineConfig({
   globalSetup: './utils/pr0game-setup',
+  globalTimeout: 0,
+  timeout: 0,
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -28,7 +30,7 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PROGAME_BASE_URL,
-    storageState: './SessionCookies.json',
+    storageState: './storage/SessionCookies.json',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry'
   },
