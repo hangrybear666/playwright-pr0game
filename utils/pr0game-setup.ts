@@ -1,22 +1,7 @@
 import { firefox } from 'playwright';
-import { devices, expect, Page } from 'playwright/test';
+import { devices, expect } from 'playwright/test';
 import { CustomBrowserContextOptions } from './customTypes';
-
-export async function randomDelay(page: Page) {
-  await page.waitForTimeout(getRandomMilisecondDelayBetweenSeconds(1, 5));
-}
-
-const getRandomMilisecondDelayBetweenSeconds = (min: number, max: number) => {
-  if (max <= min) {
-    const defaultDelay = Math.floor(Math.random() * 6 + 1) * 1000;
-    console.info('Trace: waiting for ' + defaultDelay + 'ms');
-    return defaultDelay;
-  } else {
-    const delay = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-    console.info('Trace: waiting for ' + delay + 'ms');
-    return delay;
-  }
-};
+import { randomDelay } from './sharedFunctions';
 
 const init = async () => {
   //          ___     __   __       ___  ___     ___
@@ -37,7 +22,7 @@ const init = async () => {
   let sessionCookies;
   let isSessionReusable: boolean = false;
   try {
-    sessionCookies = await import('../SessionCookies.json');
+    sessionCookies = await import('../storage/SessionCookies.json');
     const cookies = sessionCookies.cookies;
     context.addCookies(cookies as any);
     console.info('INFO: Prior Session found. Testing validity...');
@@ -75,7 +60,7 @@ const init = async () => {
     await page.getByRole('button', { name: 'Login' }).click();
     const userName = process.env.PROGAME_USERNAME!;
     await expect(page.getByRole('link', { name: userName })).toBeVisible();
-    await page.context().storageState({ path: './SessionCookies.json' });
+    await page.context().storageState({ path: './storage/SessionCookies.json' });
     console.info('INFO: Login Successful. Session persisted in storage for later reuse.');
   }
   await context.close();
