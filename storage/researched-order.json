@@ -1,0 +1,194 @@
+[
+  {
+    "order": 0,
+    "name": "Energietechnik",
+    "level": 1,
+    "cost": {
+      "met": 0,
+      "kris": 800,
+      "deut": 400
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 1,
+    "name": "Computertechnik",
+    "level": 1,
+    "cost": {
+      "met": 0,
+      "kris": 400,
+      "deut": 600
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 2,
+    "name": "Impulstriebwerk",
+    "level": 1,
+    "cost": {
+      "met": 2000,
+      "kris": 4000,
+      "deut": 600
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 3,
+    "name": "Spionagetechnik",
+    "level": 1,
+    "cost": {
+      "met": 200,
+      "kris": 1000,
+      "deut": 200
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 4,
+    "name": "Impulstriebwerk",
+    "level": 2,
+    "cost": {
+      "met": 4000,
+      "kris": 8000,
+      "deut": 1200
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 5,
+    "name": "Spionagetechnik",
+    "level": 2,
+    "cost": {
+      "met": 400,
+      "kris": 2000,
+      "deut": 400
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 6,
+    "name": "Impulstriebwerk",
+    "level": 3,
+    "cost": {
+      "met": 8000,
+      "kris": 16000,
+      "deut": 2400
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 7,
+    "name": "Spionagetechnik",
+    "level": 3,
+    "cost": {
+      "met": 800,
+      "kris": 4000,
+      "deut": 800
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 8,
+    "name": "Astrophysik",
+    "level": 1,
+    "cost": {
+      "met": 4050,
+      "kris": 8050,
+      "deut": 4050
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 9,
+    "name": "Astrophysik",
+    "level": 2,
+    "cost": {
+      "met": 7050,
+      "kris": 14050,
+      "deut": 8050
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 10,
+    "name": "Astrophysik",
+    "level": 3,
+    "cost": {
+      "met": 12350,
+      "kris": 24550,
+      "deut": 12050
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 11,
+    "name": "Spionagetechnik",
+    "level": 4,
+    "cost": {
+      "met": 1600,
+      "kris": 8000,
+      "deut": 1600
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 12,
+    "name": "Computertechnik",
+    "level": 7,
+    "cost": {
+      "met": 0,
+      "kris": 25600,
+      "deut": 38400
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 13,
+    "name": "Energietechnik",
+    "level": 7,
+    "cost": {
+      "met": 0,
+      "kris": 51200,
+      "deut": 25600
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 14,
+    "name": "Impulstriebwerk",
+    "level": 4,
+    "cost": {
+      "met": 16000,
+      "kris": 32000,
+      "deut": 4800
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 15,
+    "name": "Astrophysik",
+    "level": 10,
+    "cost": {
+      "met": 615750,
+      "kris": 1231550,
+      "deut": 616050
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null
+  }
+]

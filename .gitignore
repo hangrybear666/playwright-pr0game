@@ -30,4 +30,11 @@ yarn-error.log*
 # Custom
 SessionCookies.json
 reports/index.html
-
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

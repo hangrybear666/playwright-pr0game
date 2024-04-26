@@ -1,4 +1,4 @@
-import { Building } from './customTypes';
+import { Building } from '../customTypes';
 
 function MetallmineCost(level: number) {
   return {
@@ -88,11 +88,53 @@ function DeuteriumtankCost(level: number) {
   };
 }
 // Solarkraftwerk Kristallmine Deuteriumsynthetisierer Fusionskraftwerk Roboterfabrik Raumschiffwerft Metallspeicher Kristallspeicher Deuteriumtank Forschungslabor
-export const BUILD_ORDER: Building[] = [
+export const ROBO_BUILD_ORDER: Building[] = [
   {
     name: 'Solarkraftwerk',
     level: 1,
     cost: SolarkraftwerkCost(1),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Deuteriumsynthetisierer',
+    level: 1,
+    cost: DeuteriumsynthetisiererCost(1),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Solarkraftwerk',
+    level: 2,
+    cost: SolarkraftwerkCost(2),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Deuteriumsynthetisierer',
+    level: 2,
+    cost: DeuteriumsynthetisiererCost(2),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Roboterfabrik',
+    level: 1,
+    cost: RoboterfabrikCost(1),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Roboterfabrik',
+    level: 2,
+    cost: RoboterfabrikCost(2),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
+    name: 'Solarkraftwerk',
+    level: 3,
+    cost: SolarkraftwerkCost(3),
     hasBeenQueued: true,
     queuedAt: new Date()
   },
@@ -107,24 +149,19 @@ export const BUILD_ORDER: Building[] = [
     cost: MetallmineCost(2)
   },
   {
-    name: 'Solarkraftwerk',
-    level: 2,
-    cost: SolarkraftwerkCost(2)
-  },
-  {
     name: 'Metallmine',
     level: 3,
     cost: MetallmineCost(3)
   },
   {
+    name: 'Solarkraftwerk',
+    level: 4,
+    cost: SolarkraftwerkCost(4)
+  },
+  {
     name: 'Metallmine',
     level: 4,
     cost: MetallmineCost(4)
-  },
-  {
-    name: 'Solarkraftwerk',
-    level: 3,
-    cost: SolarkraftwerkCost(3)
   },
   {
     name: 'Kristallmine',
@@ -133,8 +170,8 @@ export const BUILD_ORDER: Building[] = [
   },
   {
     name: 'Solarkraftwerk',
-    level: 4,
-    cost: SolarkraftwerkCost(4)
+    level: 5,
+    cost: SolarkraftwerkCost(5)
   },
   {
     name: 'Metallmine',
@@ -153,13 +190,8 @@ export const BUILD_ORDER: Building[] = [
   },
   {
     name: 'Solarkraftwerk',
-    level: 5,
-    cost: SolarkraftwerkCost(5)
-  },
-  {
-    name: 'Deuteriumsynthetisierer',
-    level: 1,
-    cost: DeuteriumsynthetisiererCost(1)
+    level: 6,
+    cost: SolarkraftwerkCost(6)
   },
   {
     name: 'Kristallmine',
@@ -167,19 +199,9 @@ export const BUILD_ORDER: Building[] = [
     cost: KristallmineCost(4)
   },
   {
-    name: 'Solarkraftwerk',
-    level: 6,
-    cost: SolarkraftwerkCost(6)
-  },
-  {
     name: 'Metallmine',
     level: 6,
     cost: MetallmineCost(6)
-  },
-  {
-    name: 'Metallmine',
-    level: 7,
-    cost: MetallmineCost(7)
   },
   {
     name: 'Solarkraftwerk',
@@ -187,14 +209,14 @@ export const BUILD_ORDER: Building[] = [
     cost: SolarkraftwerkCost(7)
   },
   {
+    name: 'Metallmine',
+    level: 7,
+    cost: MetallmineCost(7)
+  },
+  {
     name: 'Kristallmine',
     level: 5,
     cost: KristallmineCost(5)
-  },
-  {
-    name: 'Deuteriumsynthetisierer',
-    level: 2,
-    cost: DeuteriumsynthetisiererCost(2)
   },
   {
     name: 'Solarkraftwerk',
@@ -220,16 +242,6 @@ export const BUILD_ORDER: Building[] = [
     name: 'Deuteriumsynthetisierer',
     level: 5,
     cost: DeuteriumsynthetisiererCost(5)
-  },
-  {
-    name: 'Roboterfabrik',
-    level: 1,
-    cost: RoboterfabrikCost(1)
-  },
-  {
-    name: 'Roboterfabrik',
-    level: 2,
-    cost: RoboterfabrikCost(2)
   },
   {
     name: 'Forschungslabor',

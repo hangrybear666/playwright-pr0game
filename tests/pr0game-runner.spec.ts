@@ -1,10 +1,11 @@
 import { test, expect, Page } from '@playwright/test';
-import { getRandomDelayBetweenMiliseconds, randomDelay } from 'utils/sharedFunctions';
+import { randomDelay } from 'utils/sharedFunctions';
 const jsdom = require('jsdom');
-import { BUILD_ORDER } from 'utils/build-order';
 import { Building } from 'utils/customTypes';
 import fs from 'fs';
 import { parameters } from 'config/parameters';
+// import { BUILD_ORDER } from 'utils/build_orders/build-order';
+import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 
 test('continue in session', async ({ page }) => {
   try {
@@ -38,7 +39,15 @@ test('continue in session', async ({ page }) => {
     // Extracts headers (name and level) for various building types from the provided building page.
     await extractBuildingLevels(page);
     // Starts an infinite recursive loop acting as the building queue process based on available resources.
-    await startBuildingQueue(energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
+    let buildCompleted = false;
+    let recursiveCallCount = 0;
+    //       _             _
+    //   ___| |_ __ _ _ __| |_    __ _ _   _  ___ _   _  ___
+    //  / __| __/ _` | '__| __|  / _` | | | |/ _ \ | | |/ _ \
+    //  \__ \ || (_| | |  | |_  | (_| | |_| |  __/ |_| |  __/
+    //  |___/\__\__,_|_|   \__|  \__, |\__,_|\___|\__,_|\___|
+    //                              |_|
+    await startBuildingQueue(buildCompleted, recursiveCallCount, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
   } catch (error: unknown) {
     console.error(error);
     if (error instanceof Error) {
@@ -47,6 +56,204 @@ test('continue in session', async ({ page }) => {
     throw error;
   }
 });
+
+/**
+ * Starts an infinite recursive loop acting as the building queue process based on available resources.
+ * It merges the original Build oder with the written .json output build order created by this program.
+ * Then it starts a build, updates the build order output file and checks in set intervals for build completion.
+ * In between checks it occasionally interacts with the page in random intervals to mimick user interactions.
+ * @param {boolean} buildCompleted - Flag indicating if the build within this queue has completed.
+ * @param {number} recursiveCallCount - The queue number starting at 0.
+ * @param {number} energyAvailable - The amount of energy available for building.
+ * @param {number} metAvailable - The amount of metal available for building.
+ * @param {number} krisAvailable - The amount of crystal available for building.
+ * @param {number} deutAvailable - The amount of deuterium available for building.
+ * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
+ * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
+ */
+async function startBuildingQueue(
+  buildCompleted: boolean,
+  recursiveCallCount: number,
+  energyAvailable: number,
+  metAvailable: number,
+  krisAvailable: number,
+  deutAvailable: number,
+  page: Page
+) {
+  let mergedBuildOrder: Building[];
+  mergedBuildOrder = mergeCurrentBuildOrderWithSource();
+  const nextBuildingOrder = getNextBuildingOrder(mergedBuildOrder);
+  const nextBuilding = mergedBuildOrder[nextBuildingOrder];
+
+  if (nextBuilding.cost.energy <= energyAvailable + parameters.ENERGY_DEFICIT_ALLOWED) {
+    if (nextBuilding.cost.met <= metAvailable && nextBuilding.cost.kris <= krisAvailable && nextBuilding.cost.deut <= deutAvailable) {
+      await randomDelay(page); // wait a random time amount before page interaction
+      // Queue next Building
+      await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click();
+      // Expect Queue to become visible
+      await expect(page.locator('#buildlist')).toBeVisible();
+      // Expect Next Building to be in Position 1. in Queue
+      expect(
+        await page.locator(`div#buildlist div:has-text("1."):has-text("${nextBuilding.name} ${nextBuilding.level}") button.build_submit`).innerText()
+      ).toBe(`${nextBuilding.name} ${nextBuilding.level}`);
+      // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
+      await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
+      queueBuilding(nextBuildingOrder, mergedBuildOrder);
+      // Notifies user of successful queue addition
+      console.info(`INFO: Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
+      expect(Number(await page.locator('div#progressbar').getAttribute('data-time'))).toBeGreaterThan(0);
+      // Check building completion status in queue and call startBuildingQueue recursively after completion
+      await refreshUntilQueueCompletion(buildCompleted, recursiveCallCount, page);
+      //   _           _ _     _                              _      _           _
+      //  | |__  _   _(_) | __| |    ___ ___  _ __ ___  _ __ | | ___| |_ ___  __| |
+      //  | '_ \| | | | | |/ _` |   / __/ _ \| '_ ` _ \| '_ \| |/ _ \ __/ _ \/ _` |
+      //  | |_) | |_| | | | (_| |  | (_| (_) | | | | | | |_) | |  __/ ||  __/ (_| |
+      //  |_.__/ \__,_|_|_|\__,_|   \___\___/|_| |_| |_| .__/|_|\___|\__\___|\__,_|
+      //                                               |_|
+      // recursively calls itself to run another round after building queue completion
+      await startBuildingQueue(buildCompleted, recursiveCallCount++, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
+    } else {
+      console.log(
+        `Trace: Waiting for resources. Checking again in a couple minutes: Cost: ${JSON.stringify(nextBuilding.cost)} Available: ${JSON.stringify({ met: metAvailable, kris: krisAvailable, deut: deutAvailable })}`
+      );
+      setTimeout(
+        () => {
+          //                 _               _                                                                  _ _       _     _ _ _ _
+          //   _ __ ___  ___| |__   ___  ___| | __   _ __ ___  ___  ___  _   _ _ __ ___ ___     __ ___   ____ _(_) | __ _| |__ (_) (_) |_ _   _
+          //  | '__/ _ \/ __| '_ \ / _ \/ __| |/ /  | '__/ _ \/ __|/ _ \| | | | '__/ __/ _ \   / _` \ \ / / _` | | |/ _` | '_ \| | | | __| | | |
+          //  | | |  __/ (__| | | |  __/ (__|   <   | | |  __/\__ \ (_) | |_| | | | (_|  __/  | (_| |\ V / (_| | | | (_| | |_) | | | | |_| |_| |
+          //  |_|  \___|\___|_| |_|\___|\___|_|\_\  |_|  \___||___/\___/ \__,_|_|  \___\___|   \__,_| \_/ \__,_|_|_|\__,_|_.__/|_|_|_|\__|\__, |
+          //                                                                                                                              |___/
+          startBuildingQueue(buildCompleted, recursiveCallCount++, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
+        },
+        parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
+          Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
+      );
+    }
+  } else {
+    const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${energyAvailable}`;
+    console.error(errorMsg);
+    throw Error(errorMsg);
+  }
+}
+
+/**
+ * Check building completion in continuous intervals until it has finished building.
+ * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
+ */
+async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+  const buildCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
+  const queueRunning = new Promise((resolve, reject) => {
+    if (buildCompletionTime <= 0) reject(new Error('ERROR: buildCompletionTime smaller than 1s: ' + buildCompletionTime));
+    setTimeout(() => {
+      resolve('INFO: Build completed after ' + buildCompletionTime + 's');
+    }, buildCompletionTime * 1000);
+  });
+  queueRunning.then(
+    (queueCompletionMsg) => {
+      // resolved
+      buildCompleted = true;
+      console.info(queueCompletionMsg);
+    },
+    (error) => {
+      // rejected
+      if (error instanceof Error) console.error('ERROR: queue has not successfully finished running: ' + error.message);
+      throw error;
+    }
+  );
+  // Checks for queue completion every 15 seconds
+  let refreshIntervalId;
+  await new Promise<void>((resolve) => {
+    refreshIntervalId = setInterval(() => {
+      console.log(`Trace: Checking if build in queue ${recursiveCallCount} has finished...`);
+      if (buildCompleted) {
+        console.log('Trace: ENTER RECURSIVE FUNCTION CALL');
+        resolve();
+      }
+    }, parameters.QUEUE_REFRESH_INTERVAL);
+  });
+  // so there aren't any lingering intervals from prior queues spamming refreshes
+  clearInterval(refreshIntervalId);
+  buildCompleted = false;
+}
+
+/**
+ * loops through the build order and extracts mext value that hasn't yet been queued.
+ */
+function getNextBuildingOrder(buildings: Building[]): number {
+  let order;
+  buildings.every((e) => {
+    if (!e.hasBeenQueued) {
+      order = e.order;
+      return false;
+    } else {
+      return true;
+    }
+  });
+  return order ? order : 1;
+}
+
+/**
+ * Persists the updatedBuildOrder to storage as json file with 2 spaces as indentation for readability
+ * @param {Building[]} updatedBuildOrder
+ * @param {string} path
+ */
+function writeJSONToFile(updatedBuildOrder: Building[], path: string) {
+  fs.writeFile(path, JSON.stringify(updatedBuildOrder, null, 2), (err) => {
+    if (err) {
+      console.error("ERROR: Couldn't write JSON file: ", err);
+    } else {
+      console.info('INFO: Updated built-order at:', path);
+    }
+  });
+}
+/**
+ * Marks the next building in line as queued and updates the .json output file.
+ * Receives a merged build order and the index of the next building to queue.
+ * @param index index within build order array
+ * @param buildOrder merged build order with updated hasBeenQueued and queuedAt0 values
+ */
+function queueBuilding(index: number, buildOrder: Building[]) {
+  if (index >= 0 && index < buildOrder.length) {
+    const building = buildOrder[index];
+    if (!building.hasBeenQueued) {
+      buildOrder[index].hasBeenQueued = true;
+      buildOrder[index].queuedAt = new Date();
+      writeJSONToFile(buildOrder, './storage/built-order.json'); // Write updated data to JSON file
+    } else {
+      console.error('ERROR: Building has already been queued.');
+    }
+  } else {
+    console.error('ERROR: Invalid building index.');
+  }
+}
+
+/**
+ * Merges the original Build oder with the written .json output build order created by this program.
+ * Updates values are:
+ * - hasBeenQueued
+ * - queuedAt
+ * @returns source build order with updated values for queued status
+ */
+function mergeCurrentBuildOrderWithSource() {
+  const updatedBuildOrderData: Building[] = JSON.parse(fs.readFileSync('./storage/built-order.json', 'utf-8'));
+  const mergedBuildOrder: Building[] = ROBO_BUILD_ORDER.map((originalBuilding, index) => {
+    let updatedBuilding;
+    if (index < updatedBuildOrderData.length) {
+      updatedBuilding = updatedBuildOrderData[index];
+    }
+    const mergedData = {
+      ...originalBuilding,
+      ...(updatedBuilding && {
+        hasBeenQueued: updatedBuilding.hasBeenQueued,
+        queuedAt: updatedBuilding.queuedAt
+      })
+    };
+    return mergedData;
+  });
+  return mergedBuildOrder;
+}
+
 /**
  * Extracts headers (name and level) for various building types from the provided building page.
  * @param {Page} page - The Playwright Page object representing the webpage to extract from.
@@ -104,174 +311,4 @@ async function extractBuildingLevels(page: Page) {
   console.log(metallspeicherHeader);
   console.log(kristallspeicherHeader);
   console.log(deuteriumtankHeader);
-}
-
-/**
- * Starts an infinite recursive loop acting as the building queue process based on available resources.
- * It merges the original Build oder with the written .json output build order created by this program.
- * Then it starts a build, updates the build order output file and checks in set intervals for build completion.
- * In between checks it occasionally interacts with the page in random intervals to mimick user interactions.
- * @param {number} energyAvailable - The amount of energy available for building.
- * @param {number} metAvailable - The amount of metal available for building.
- * @param {number} krisAvailable - The amount of crystal available for building.
- * @param {number} deutAvailable - The amount of deuterium available for building.
- * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
- * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
- */
-async function startBuildingQueue(energyAvailable: number, metAvailable: number, krisAvailable: number, deutAvailable: number, page: Page) {
-  let mergedBuildOrder: Building[];
-  mergedBuildOrder = mergeCurrentBuildOrderWithSource();
-  const nextBuildingOrder = getNextBuildingOrder(mergedBuildOrder);
-  const nextBuilding = mergedBuildOrder[nextBuildingOrder];
-
-  if (nextBuilding.cost.energy <= energyAvailable + 25) {
-    if (nextBuilding.cost.met <= metAvailable && nextBuilding.cost.kris <= krisAvailable && nextBuilding.cost.deut <= deutAvailable) {
-      await randomDelay(page); // wait a random time amount before page interaction
-
-      // Queue next Building
-      await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click();
-      // Expect Queue to become visible
-      await expect(page.locator('#buildlist')).toBeVisible();
-      // Expect Next Building to be in Position 1. in Queue
-      expect(
-        await page.locator(`div#buildlist div:has-text("1."):has-text("${nextBuilding.name} ${nextBuilding.level}") button.build_submit`).innerText()
-      ).toBe(`${nextBuilding.name} ${nextBuilding.level}`);
-      // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
-      await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
-      queueBuilding(nextBuildingOrder, mergedBuildOrder);
-      // Notifies user of successful queue addition
-      console.info(`INFO: Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
-      expect(Number(await page.locator('div#progressbar').getAttribute('data-time'))).toBeGreaterThan(0);
-      // Check building completion status in queue and call startBuildingQueue recursively after completion
-      await refreshUntilQueueCompletion(page);
-      // recursively calls itself to run another round after building queue completion
-      await startBuildingQueue(energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
-    } else {
-      console.log(
-        `Trace: Waiting for resources. Checking again in a couple minutes: Cost: ${JSON.stringify(nextBuilding.cost)} Available: ${JSON.stringify({ met: metAvailable, kris: krisAvailable, deut: deutAvailable })}`
-      );
-      // Wait for a couple minutes and check again.
-      // TODO check for energy again.
-    }
-  } else {
-    console.error(
-      `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${energyAvailable}`
-    );
-  }
-}
-
-/**
- * Check building completion in continuous intervals until it has finished building.
- * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
- */
-async function refreshUntilQueueCompletion(page: Page) {
-  const buildCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
-  let buildCompleted = false;
-  const queueRunning = new Promise((resolve, reject) => {
-    if (buildCompletionTime <= 0) reject(new Error('ERROR: buildCompletionTime smaller than 1s: ' + buildCompletionTime));
-    setTimeout(() => {
-      resolve('INFO: Build completed after ' + buildCompletionTime + 's');
-    }, buildCompletionTime * 1000);
-  });
-  queueRunning.then(
-    (queueCompletionMsg) => {
-      // resolve
-      buildCompleted = true;
-      console.info(queueCompletionMsg);
-    },
-    (error) => {
-      // reject
-      if (error instanceof Error) console.error('ERROR: queue has not successfully finished running: ' + error.message);
-      throw error;
-    }
-  );
-  // Checks for queue completion every 15 seconds
-  await new Promise<void>((resolve) => {
-    setInterval(() => {
-      console.log('Trace: Checking if build has finished...');
-      if (buildCompleted) {
-        // QUEUE NEW BUILDING BRE
-        console.log('WE ARE READY TO RECURSIVELY CALL THE BUILD QUEUE');
-        resolve();
-      }
-    }, parameters.QUEUE_REFRESH_INTERVAL);
-  });
-  buildCompleted = false;
-}
-
-/**
- * loops through the build order and extracts mext value that hasn't yet been queued.
- */
-function getNextBuildingOrder(buildings: Building[]): number {
-  let order;
-  buildings.every((e) => {
-    if (!e.hasBeenQueued) {
-      order = e.order;
-      return false;
-    } else {
-      return true;
-    }
-  });
-  return order ? order : 1;
-}
-
-/**
- * Persists the updatedBuildOrder to storage as json file with 2 spaces as indentation for readability
- * @param {Building[]} updatedBuildOrder
- * @param {string} path
- */
-function writeJSONToFile(updatedBuildOrder: Building[], path: string) {
-  fs.writeFile(path, JSON.stringify(updatedBuildOrder, null, 2), (err) => {
-    if (err) {
-      console.error("ERROR: Couldn't write JSON file: ", err);
-    } else {
-      console.info('INFO: Updated Build order written successfully to:', path);
-    }
-  });
-}
-/**
- * Marks the next building in line as queued and updates the .json output file.
- * Receives a merged build order and the index of the next building to queue.
- * @param index index within build order array
- * @param buildOrder merged build order with updated hasBeenQueued and queuedAt0 values
- */
-function queueBuilding(index: number, buildOrder: Building[]) {
-  if (index >= 0 && index < buildOrder.length) {
-    const building = buildOrder[index];
-    if (!building.hasBeenQueued) {
-      buildOrder[index].hasBeenQueued = true;
-      buildOrder[index].queuedAt = new Date();
-      writeJSONToFile(buildOrder, './storage/built-order.json'); // Write updated data to JSON file
-    } else {
-      console.error('ERROR: Building has already been queued.');
-    }
-  } else {
-    console.error('ERROR: Invalid building index.');
-  }
-}
-
-/**
- * Merges the original Build oder with the written .json output build order created by this program.
- * Updates values are:
- * - hasBeenQueued
- * - queuedAt
- * @returns source build order with updated values for queued status
- */
-function mergeCurrentBuildOrderWithSource() {
-  const updatedBuildOrderData: Building[] = JSON.parse(fs.readFileSync('./storage/built-order.json', 'utf-8'));
-  const mergedBuildOrder: Building[] = BUILD_ORDER.map((originalBuilding, index) => {
-    let updatedBuilding;
-    if (index < updatedBuildOrderData.length) {
-      updatedBuilding = updatedBuildOrderData[index];
-    }
-    const mergedData = {
-      ...originalBuilding,
-      ...(updatedBuilding && {
-        hasBeenQueued: updatedBuilding.hasBeenQueued,
-        queuedAt: updatedBuilding.queuedAt
-      })
-    };
-    return mergedData;
-  });
-  return mergedBuildOrder;
 }
