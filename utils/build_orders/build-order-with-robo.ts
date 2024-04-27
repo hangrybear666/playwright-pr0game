@@ -139,6 +139,13 @@ export const ROBO_BUILD_ORDER: Building[] = [
     queuedAt: new Date()
   },
   {
+    name: 'Forschungslabor',
+    level: 1,
+    cost: ForschungslaborCost(1),
+    hasBeenQueued: true,
+    queuedAt: new Date()
+  },
+  {
     name: 'Metallmine',
     level: 1,
     cost: MetallmineCost(1)
@@ -242,11 +249,6 @@ export const ROBO_BUILD_ORDER: Building[] = [
     name: 'Deuteriumsynthetisierer',
     level: 5,
     cost: DeuteriumsynthetisiererCost(5)
-  },
-  {
-    name: 'Forschungslabor',
-    level: 1,
-    cost: ForschungslaborCost(1)
   },
   {
     name: 'Raumschiffwerft',
@@ -377,5 +379,6 @@ export const ROBO_BUILD_ORDER: Building[] = [
   order: index, // build order starting at 0 from array index
   ...building, // explicitly defined building variables
   hasBeenQueued: building.hasBeenQueued ? building.hasBeenQueued : false, // defaults to false unless provided in object explicitly
-  queuedAt: building.queuedAt ? building.queuedAt : null // defaults to null unless provided in object explicitly
+  queuedAt: building.queuedAt ? building.queuedAt : null, // defaults to null unless provided in object explicitly
+  constructionType: 'building'
 }));

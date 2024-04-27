@@ -7,37 +7,19 @@ import { parameters } from 'config/parameters';
 // import { BUILD_ORDER } from 'utils/build_orders/build-order';
 import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 
-test('continue in session', async ({ page }) => {
+test('start main planet build queue', async ({ page }) => {
   try {
     await page.goto('/uni4/game.php');
     const userName = process.env.PROGAME_USERNAME!;
     await expect(page.getByRole('link', { name: userName })).toBeVisible();
     await expect(page.getByRole('link', { name: /Metall[0-9\.\s]/ })).toBeVisible(); // Metall followed by whitespace, numbers or a dot
-    const metAmt = await page.locator('#current_metal').getAttribute('data-real');
-    const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
-    const deutAmt = await page.locator('#current_deuterium').getAttribute('data-real');
-    const energieHtml = await page.getByRole('link', { name: /Energie[0-9\.\/\s]/ }).innerHTML(); // Energie followed by whitespace, numbers, a dot or backslash
-    const { JSDOM } = jsdom;
-    const energyDOM = new JSDOM(energieHtml);
-    const energyDocument: Document = energyDOM.window.document;
-    const energySpans = energyDocument.querySelectorAll('span');
-    let energieAmt: string = '';
-    energySpans.forEach((e) => {
-      if (e.textContent?.includes('/')) {
-        energieAmt = e.textContent.split('/')[0];
-      }
-    });
-    const metAvailable: number = metAmt ? parseInt(metAmt) : 0;
-    const krisAvailable: number = krisAmt ? parseInt(krisAmt) : 0;
-    const deutAvailable: number = deutAmt ? parseInt(deutAmt) : 0;
-    const energyAvailable: number = energieAmt ? parseInt(energieAmt) : 0;
 
     await randomDelay(page); // wait a random time amount before page interaction
     await page.getByRole('link', { name: 'Gebäude', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Rohstoffabbau' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Lagerung' })).toBeVisible();
     // Extracts headers (name and level) for various building types from the provided building page.
-    await extractBuildingLevels(page);
+    await extractCurrentBuildingLevels(page);
     // Starts an infinite recursive loop acting as the building queue process based on available resources.
     let buildCompleted = false;
     let recursiveCallCount = 0;
@@ -47,7 +29,7 @@ test('continue in session', async ({ page }) => {
     //  \__ \ || (_| | |  | |_  | (_| | |_| |  __/ |_| |  __/
     //  |___/\__\__,_|_|   \__|  \__, |\__,_|\___|\__,_|\___|
     //                              |_|
-    await startBuildingQueue(buildCompleted, recursiveCallCount, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
+    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   } catch (error: unknown) {
     console.error(error);
     if (error instanceof Error) {
@@ -58,36 +40,69 @@ test('continue in session', async ({ page }) => {
 });
 
 /**
+ *
+ * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
+ * @returns
+ */
+async function extractCurrentResourceCount(page: Page) {
+  // refresh page for current prices
+  await page.reload();
+  const metAmt = await page.locator('#current_metal').getAttribute('data-real');
+  const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
+  const deutAmt = await page.locator('#current_deuterium').getAttribute('data-real');
+  const energieHtml = await page.getByRole('link', { name: /Energie[0-9\.\/\s]/ }).innerHTML(); // Energie followed by whitespace, numbers, a dot or backslash
+  const { JSDOM } = jsdom;
+  const energyDOM = new JSDOM(energieHtml);
+  const energyDocument: Document = energyDOM.window.document;
+  const energySpans = energyDocument.querySelectorAll('span');
+  let energieAmt: string = '';
+  energySpans.forEach((e) => {
+    if (e.textContent?.includes('/')) {
+      energieAmt = e.textContent.split('/')[0];
+    }
+  });
+  const metAvailable = metAmt ? parseInt(metAmt) : 0;
+  const krisAvailable = krisAmt ? parseInt(krisAmt) : 0;
+  const deutAvailable = deutAmt ? parseInt(deutAmt) : 0;
+  const energyAvailable = energieAmt ? parseInt(energieAmt) : 0;
+  console.log(`Trace: Resource Availability: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}] Energy [${energyAvailable}]`);
+  return { metAvailable, krisAvailable, deutAvailable, energyAvailable };
+}
+
+/**
  * Starts an infinite recursive loop acting as the building queue process based on available resources.
  * It merges the original Build oder with the written .json output build order created by this program.
  * Then it starts a build, updates the build order output file and checks in set intervals for build completion.
  * In between checks it occasionally interacts with the page in random intervals to mimick user interactions.
  * @param {boolean} buildCompleted - Flag indicating if the build within this queue has completed.
  * @param {number} recursiveCallCount - The queue number starting at 0.
- * @param {number} energyAvailable - The amount of energy available for building.
- * @param {number} metAvailable - The amount of metal available for building.
- * @param {number} krisAvailable - The amount of crystal available for building.
- * @param {number} deutAvailable - The amount of deuterium available for building.
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
  * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
  */
-async function startBuildingQueue(
-  buildCompleted: boolean,
-  recursiveCallCount: number,
-  energyAvailable: number,
-  metAvailable: number,
-  krisAvailable: number,
-  deutAvailable: number,
-  page: Page
-) {
+async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+  // fetch current resources since they could have changed since last execution
+  const currentRes = await extractCurrentResourceCount(page);
+  let metAvailable: number = currentRes.metAvailable;
+  let krisAvailable: number = currentRes.krisAvailable;
+  let deutAvailable: number = currentRes.deutAvailable;
+  let energyAvailable: number = currentRes.energyAvailable;
+  // Merge original build with already built order
   let mergedBuildOrder: Building[];
   mergedBuildOrder = mergeCurrentBuildOrderWithSource();
   const nextBuildingOrder = getNextBuildingOrder(mergedBuildOrder);
   const nextBuilding = mergedBuildOrder[nextBuildingOrder];
 
+  // Check for resource constraints
   if (nextBuilding.cost.energy <= energyAvailable + parameters.ENERGY_DEFICIT_ALLOWED) {
     if (nextBuilding.cost.met <= metAvailable && nextBuilding.cost.kris <= krisAvailable && nextBuilding.cost.deut <= deutAvailable) {
-      await randomDelay(page); // wait a random time amount before page interaction
+      if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
+        console.log('Trace: Navigating back to building overview.');
+        await page.goto('/uni4/game.php?page=buildings');
+        await randomDelay(page); // wait a random time amount before page interaction
+      } else {
+        console.log(`Trace: Currently on building page and next building ${nextBuilding.name} ${nextBuilding.level} can be queued.`);
+        await randomDelay(page); // wait a random time amount before page interaction
+      }
       // Queue next Building
       await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click();
       // Expect Queue to become visible
@@ -111,24 +126,31 @@ async function startBuildingQueue(
       //  |_.__/ \__,_|_|_|\__,_|   \___\___/|_| |_| |_| .__/|_|\___|\__\___|\__,_|
       //                                               |_|
       // recursively calls itself to run another round after building queue completion
-      await startBuildingQueue(buildCompleted, recursiveCallCount++, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
+      await startBuildingQueue(buildCompleted, recursiveCallCount++, page);
     } else {
       console.log(
-        `Trace: Waiting for resources. Checking again in a couple minutes: Cost: ${JSON.stringify(nextBuilding.cost)} Available: ${JSON.stringify({ met: metAvailable, kris: krisAvailable, deut: deutAvailable })}`
+        // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
+        // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
+        `Trace: Waiting for resources. Checking again in a couple minutes.
+Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > 0 ? nextBuilding.cost.kris - krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > 0 ? nextBuilding.cost.deut - deutAvailable : 'none'}]`
       );
-      setTimeout(
-        () => {
-          //                 _               _                                                                  _ _       _     _ _ _ _
-          //   _ __ ___  ___| |__   ___  ___| | __   _ __ ___  ___  ___  _   _ _ __ ___ ___     __ ___   ____ _(_) | __ _| |__ (_) (_) |_ _   _
-          //  | '__/ _ \/ __| '_ \ / _ \/ __| |/ /  | '__/ _ \/ __|/ _ \| | | | '__/ __/ _ \   / _` \ \ / / _` | | |/ _` | '_ \| | | | __| | | |
-          //  | | |  __/ (__| | | |  __/ (__|   <   | | |  __/\__ \ (_) | |_| | | | (_|  __/  | (_| |\ V / (_| | | | (_| | |_) | | | | |_| |_| |
-          //  |_|  \___|\___|_| |_|\___|\___|_|\_\  |_|  \___||___/\___/ \__,_|_|  \___\___|   \__,_| \_/ \__,_|_|_|\__,_|_.__/|_|_|_|\__|\__, |
-          //                                                                                                                              |___/
-          startBuildingQueue(buildCompleted, recursiveCallCount++, energyAvailable, metAvailable, krisAvailable, deutAvailable, page);
-        },
-        parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
-          Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
-      );
+      // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
+      await new Promise<void>((resolve) => {
+        setTimeout(
+          () => {
+            resolve();
+          },
+          parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
+            Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
+        );
+      });
+      //                 _               _                                                                  _ _       _     _ _ _ _
+      //   _ __ ___  ___| |__   ___  ___| | __   _ __ ___  ___  ___  _   _ _ __ ___ ___     __ ___   ____ _(_) | __ _| |__ (_) (_) |_ _   _
+      //  | '__/ _ \/ __| '_ \ / _ \/ __| |/ /  | '__/ _ \/ __|/ _ \| | | | '__/ __/ _ \   / _` \ \ / / _` | | |/ _` | '_ \| | | | __| | | |
+      //  | | |  __/ (__| | | |  __/ (__|   <   | | |  __/\__ \ (_) | |_| | | | (_|  __/  | (_| |\ V / (_| | | | (_| | |_) | | | | |_| |_| |
+      //  |_|  \___|\___|_| |_|\___|\___|_|\_\  |_|  \___||___/\___/ \__,_|_|  \___\___|   \__,_| \_/ \__,_|_|_|\__,_|_.__/|_|_|_|\__|\__, |
+      //                                                                                                                              |___/
+      await startBuildingQueue(buildCompleted, recursiveCallCount++, page);
     }
   } else {
     const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${energyAvailable}`;
@@ -161,20 +183,68 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
       throw error;
     }
   );
-  // Checks for queue completion every 15 seconds
+  // Checks for queue completion every QUEUE_REFRESH_INTERVAL +/- QUEUE_REFRESH_INTERVAL_VARIANCE miliseconds
   let refreshIntervalId;
   await new Promise<void>((resolve) => {
-    refreshIntervalId = setInterval(() => {
-      console.log(`Trace: Checking if build in queue ${recursiveCallCount} has finished...`);
-      if (buildCompleted) {
-        console.log('Trace: ENTER RECURSIVE FUNCTION CALL');
-        resolve();
-      }
-    }, parameters.QUEUE_REFRESH_INTERVAL);
+    refreshIntervalId = setInterval(
+      async () => {
+        console.log(`Trace: Checking if build in queue ${recursiveCallCount} has finished...`);
+        if (buildCompleted) {
+          console.debug('Trace: ENTER RECURSIVE FUNCTION CALL');
+          resolve();
+        } else {
+          await randomPlayerInteraction(page);
+        }
+      },
+      parameters.QUEUE_REFRESH_INTERVAL +
+        Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.QUEUE_REFRESH_INTERVAL_VARIANCE : parameters.QUEUE_REFRESH_INTERVAL_VARIANCE))
+    );
   });
   // so there aren't any lingering intervals from prior queues spamming refreshes
   clearInterval(refreshIntervalId);
   buildCompleted = false;
+}
+
+/**
+ * simulates player interactions and is called in semi-random time amounts to not idle until queue completion.
+ * @param page
+ */
+async function randomPlayerInteraction(page: Page) {
+  console.log('Trace: Simulating erratic player interaction.');
+  const randomEvent = Math.floor(Math.random() * 7);
+  switch (randomEvent) {
+    case 1:
+      console.log('Trace: Refreshing current Page.');
+      await page.reload();
+      break;
+    case 2:
+      console.log('Trace: Navigating to Imperium View.');
+      await page.goto('/uni4/game.php?page=Empire');
+      break;
+    case 3:
+      console.log('Trace: Navigating to Research View.');
+      await page.goto('/uni4/game.php?page=research');
+      break;
+    case 4:
+      console.log('Trace: Navigating to Overview.');
+      await page.goto('/uni4/game.php?page=overview');
+      break;
+    case 5:
+      console.log('Trace: Navigating to Tech Tree.');
+      await page.goto('/uni4/game.php?page=techtree');
+      break;
+    case 5:
+      console.log('Trace: Navigating to Galaxy.');
+      await page.goto('/uni4/game.php?page=galaxy');
+      break;
+    case 6:
+      console.log('Trace: Navigating to Building Overview.');
+      await page.goto('/uni4/game.php?page=buildings');
+      break;
+    default:
+      console.log('Trace: Do Nothing.');
+      break;
+  }
 }
 
 /**
@@ -203,7 +273,7 @@ function writeJSONToFile(updatedBuildOrder: Building[], path: string) {
     if (err) {
       console.error("ERROR: Couldn't write JSON file: ", err);
     } else {
-      console.info('INFO: Updated built-order at:', path);
+      console.log('Trace: Updated built-order at:', path);
     }
   });
 }
@@ -259,7 +329,7 @@ function mergeCurrentBuildOrderWithSource() {
  * @param {Page} page - The Playwright Page object representing the webpage to extract from.
  * @throws {Error} - If there are any issues during the extraction process.
  */
-async function extractBuildingLevels(page: Page) {
+async function extractCurrentBuildingLevels(page: Page) {
   const metallmineHeader = await page
     .locator('div[class="buildn"]')
     .and(page.getByText(/Metallmine(?:\s*\(Stufe\s*\d{1,2}\))?/g))
@@ -301,6 +371,7 @@ async function extractBuildingLevels(page: Page) {
     .and(page.getByText(/Deuteriumtank(?:\s*\(Stufe\s*\d{1,2}\))?/g))
     .allInnerTexts();
   // TODO something with the header values
+  console.info('INFO: Current building levels:');
   console.log(metallmineHeader);
   console.log(solarkraftwerkHeader);
   console.log(kristallmineHeader);

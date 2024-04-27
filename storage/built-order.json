@@ -12,7 +12,8 @@
       "totalEnergyProduction": 22
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 1,
@@ -26,7 +27,8 @@
       "totalEnergyConsumption": 22
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 2,
@@ -41,7 +43,8 @@
       "totalEnergyProduction": 48
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 3,
@@ -55,7 +58,8 @@
       "totalEnergyConsumption": 48
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 4,
@@ -68,7 +72,8 @@
       "energy": 0
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 5,
@@ -81,7 +86,8 @@
       "energy": 0
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 6,
@@ -96,10 +102,25 @@
       "totalEnergyProduction": 80
     },
     "hasBeenQueued": true,
-    "queuedAt": "2024-04-26T23:54:51.382Z"
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
   },
   {
     "order": 7,
+    "name": "Forschungslabor",
+    "level": 1,
+    "cost": {
+      "met": 200,
+      "kris": 400,
+      "deut": 200,
+      "energy": 0
+    },
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:24:23.481Z",
+    "constructionType": "building"
+  },
+  {
+    "order": 8,
     "name": "Metallmine",
     "level": 1,
     "cost": {
@@ -109,11 +130,12 @@
       "energy": 11,
       "totalEnergyConsumption": 11
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:25:10.071Z",
+    "constructionType": "building"
   },
   {
-    "order": 8,
+    "order": 9,
     "name": "Metallmine",
     "level": 2,
     "cost": {
@@ -123,11 +145,12 @@
       "energy": 13,
       "totalEnergyConsumption": 24
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:25:32.465Z",
+    "constructionType": "building"
   },
   {
-    "order": 9,
+    "order": 10,
     "name": "Metallmine",
     "level": 3,
     "cost": {
@@ -137,11 +160,12 @@
       "energy": 16,
       "totalEnergyConsumption": 40
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:26:04.064Z",
+    "constructionType": "building"
   },
   {
-    "order": 10,
+    "order": 11,
     "name": "Solarkraftwerk",
     "level": 4,
     "cost": {
@@ -152,11 +176,12 @@
       "energyProduction": 37,
       "totalEnergyProduction": 117
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:26:50.372Z",
+    "constructionType": "building"
   },
   {
-    "order": 11,
+    "order": 12,
     "name": "Metallmine",
     "level": 4,
     "cost": {
@@ -166,11 +191,12 @@
       "energy": 19,
       "totalEnergyConsumption": 59
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:28:19.382Z",
+    "constructionType": "building"
   },
   {
-    "order": 12,
+    "order": 13,
     "name": "Kristallmine",
     "level": 1,
     "cost": {
@@ -180,11 +206,12 @@
       "energy": 11,
       "totalEnergyConsumption": 11
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:29:25.874Z",
+    "constructionType": "building"
   },
   {
-    "order": 13,
+    "order": 14,
     "name": "Solarkraftwerk",
     "level": 5,
     "cost": {
@@ -195,11 +222,12 @@
       "energyProduction": 44,
       "totalEnergyProduction": 161
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:29:47.230Z",
+    "constructionType": "building"
   },
   {
-    "order": 14,
+    "order": 15,
     "name": "Metallmine",
     "level": 5,
     "cost": {
@@ -209,11 +237,12 @@
       "energy": 22,
       "totalEnergyConsumption": 81
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:31:59.743Z",
+    "constructionType": "building"
   },
   {
-    "order": 15,
+    "order": 16,
     "name": "Kristallmine",
     "level": 2,
     "cost": {
@@ -223,11 +252,12 @@
       "energy": 13,
       "totalEnergyConsumption": 24
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:33:34.257Z",
+    "constructionType": "building"
   },
   {
-    "order": 16,
+    "order": 17,
     "name": "Kristallmine",
     "level": 3,
     "cost": {
@@ -237,11 +267,12 @@
       "energy": 16,
       "totalEnergyConsumption": 40
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:34:08.541Z",
+    "constructionType": "building"
   },
   {
-    "order": 17,
+    "order": 18,
     "name": "Solarkraftwerk",
     "level": 6,
     "cost": {
@@ -252,11 +283,12 @@
       "energyProduction": 52,
       "totalEnergyProduction": 213
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:34:58.022Z",
+    "constructionType": "building"
   },
   {
-    "order": 18,
+    "order": 19,
     "name": "Kristallmine",
     "level": 4,
     "cost": {
@@ -266,11 +298,12 @@
       "energy": 19,
       "totalEnergyConsumption": 59
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:38:18.654Z",
+    "constructionType": "building"
   },
   {
-    "order": 19,
+    "order": 20,
     "name": "Metallmine",
     "level": 6,
     "cost": {
@@ -280,11 +313,12 @@
       "energy": 25,
       "totalEnergyConsumption": 106
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:39:33.977Z",
+    "constructionType": "building"
   },
   {
-    "order": 20,
+    "order": 21,
     "name": "Solarkraftwerk",
     "level": 7,
     "cost": {
@@ -295,11 +329,12 @@
       "energyProduction": 60,
       "totalEnergyProduction": 273
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:41:52.779Z",
+    "constructionType": "building"
   },
   {
-    "order": 21,
+    "order": 22,
     "name": "Metallmine",
     "level": 7,
     "cost": {
@@ -309,11 +344,12 @@
       "energy": 30,
       "totalEnergyConsumption": 136
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:46:47.093Z",
+    "constructionType": "building"
   },
   {
-    "order": 22,
+    "order": 23,
     "name": "Kristallmine",
     "level": 5,
     "cost": {
@@ -323,11 +359,12 @@
       "energy": 22,
       "totalEnergyConsumption": 81
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T18:50:26.840Z",
+    "constructionType": "building"
   },
   {
-    "order": 23,
+    "order": 24,
     "name": "Solarkraftwerk",
     "level": 8,
     "cost": {
@@ -338,11 +375,12 @@
       "energyProduction": 70,
       "totalEnergyProduction": 343
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T21:18:37.142Z",
+    "constructionType": "building"
   },
   {
-    "order": 24,
+    "order": 25,
     "name": "Deuteriumsynthetisierer",
     "level": 3,
     "cost": {
@@ -352,11 +390,12 @@
       "energy": 32,
       "totalEnergyConsumption": 80
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T21:26:11.383Z",
+    "constructionType": "building"
   },
   {
-    "order": 25,
+    "order": 26,
     "name": "Deuteriumsynthetisierer",
     "level": 4,
     "cost": {
@@ -366,11 +405,12 @@
       "energy": 37,
       "totalEnergyConsumption": 117
     },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-27T21:29:11.663Z",
+    "constructionType": "building"
   },
   {
-    "order": 26,
+    "order": 27,
     "name": "Solarkraftwerk",
     "level": 9,
     "cost": {
@@ -382,10 +422,11 @@
       "totalEnergyProduction": 424
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
-    "order": 27,
+    "order": 28,
     "name": "Deuteriumsynthetisierer",
     "level": 5,
     "cost": {
@@ -396,20 +437,8 @@
       "totalEnergyConsumption": 161
     },
     "hasBeenQueued": false,
-    "queuedAt": null
-  },
-  {
-    "order": 28,
-    "name": "Forschungslabor",
-    "level": 1,
-    "cost": {
-      "met": 200,
-      "kris": 400,
-      "deut": 200,
-      "energy": 0
-    },
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 29,
@@ -422,7 +451,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 30,
@@ -436,7 +466,8 @@
       "totalEnergyConsumption": 106
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 31,
@@ -449,7 +480,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 32,
@@ -464,7 +496,8 @@
       "totalEnergyProduction": 519
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 33,
@@ -478,7 +511,8 @@
       "totalEnergyConsumption": 213
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 34,
@@ -492,7 +526,8 @@
       "totalEnergyConsumption": 171
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 35,
@@ -507,7 +542,8 @@
       "totalEnergyProduction": 628
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 36,
@@ -521,7 +557,8 @@
       "totalEnergyConsumption": 136
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 37,
@@ -535,7 +572,8 @@
       "totalEnergyConsumption": 212
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 38,
@@ -549,7 +587,8 @@
       "totalEnergyConsumption": 259
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 39,
@@ -564,7 +603,8 @@
       "totalEnergyProduction": 753
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 40,
@@ -578,7 +618,8 @@
       "totalEnergyConsumption": 171
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 41,
@@ -592,7 +633,8 @@
       "totalEnergyConsumption": 273
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 42,
@@ -607,7 +649,8 @@
       "totalEnergyProduction": 898
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 43,
@@ -621,7 +664,8 @@
       "totalEnergyConsumption": 314
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 44,
@@ -635,7 +679,8 @@
       "totalEnergyConsumption": 212
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 45,
@@ -648,7 +693,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 46,
@@ -661,7 +707,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 47,
@@ -674,7 +721,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 48,
@@ -689,7 +737,8 @@
       "totalEnergyProduction": 1063
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 49,
@@ -703,7 +752,8 @@
       "totalEnergyConsumption": 377
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 50,
@@ -717,7 +767,8 @@
       "totalEnergyConsumption": 259
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 51,
@@ -731,7 +782,8 @@
       "totalEnergyConsumption": 343
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 52,
@@ -744,7 +796,8 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   },
   {
     "order": 53,
@@ -757,6 +810,7 @@
       "energy": 0
     },
     "hasBeenQueued": false,
-    "queuedAt": null
+    "queuedAt": null,
+    "constructionType": "building"
   }
 ]

@@ -8,7 +8,8 @@ export const CustomBrowserContextOptions = {
   colorScheme: 'dark'
 };
 
-export type Building = {
+type BaseConstruct = {
+  constructionType: string;
   order: number;
   name: string;
   level: number;
@@ -16,24 +17,33 @@ export type Building = {
     met: number;
     kris: number;
     deut: number;
-    energy: number;
-    energyProduction?: number;
-    totalEnergyProduction?: number;
-    totalEnergyConsumption?: number;
   };
   hasBeenQueued: boolean;
   queuedAt: Date | null;
 };
 
-export type Research = {
-  order: number;
-  name: string;
-  level: number;
-  cost: {
-    met: number;
-    kris: number;
-    deut: number;
+type BaseCost = {
+  met: number;
+  kris: number;
+  deut: number;
+};
+export type Research = BaseConstruct & {
+  cost: BaseCost;
+  minResearchlabLevel: number;
+};
+
+export type Building = BaseConstruct & {
+  cost: BaseCost & {
+    energy: number;
+    energyProduction?: number;
+    totalEnergyProduction?: number;
+    totalEnergyConsumption?: number;
   };
-  hasBeenQueued: boolean;
-  queuedAt: Date | null;
+};
+
+export type Ships = BaseConstruct & {
+  cost: BaseCost;
+};
+export type Defense = BaseConstruct & {
+  cost: BaseCost;
 };

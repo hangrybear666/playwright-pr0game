@@ -365,5 +365,6 @@ export const BUILD_ORDER: Building[] = [
   order: index, // build order starting at 0 from array index
   ...building, // explicitly defined building variables
   hasBeenQueued: building.hasBeenQueued ? building.hasBeenQueued : false, // defaults to false unless provided in object explicitly
-  queuedAt: building.queuedAt ? building.queuedAt : null // defaults to null unless provided in object explicitly
+  queuedAt: building.queuedAt ? building.queuedAt : null, // defaults to null unless provided in object explicitly
+  constructionType: 'building'
 }));

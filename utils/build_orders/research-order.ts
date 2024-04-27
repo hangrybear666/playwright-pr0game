@@ -9,7 +9,8 @@ function Spionagetechnik(level: number) {
       met: 100 * Math.pow(2, level),
       kris: 500 * Math.pow(2, level),
       deut: 100 * Math.pow(2, level)
-    }
+    },
+    minResearchlabLevel: 3
   };
 }
 
@@ -22,7 +23,8 @@ function Computertechnik(level: number) {
       met: 0,
       kris: 200 * Math.pow(2, level),
       deut: 300 * Math.pow(2, level)
-    }
+    },
+    minResearchlabLevel: 1
   };
 }
 
@@ -75,7 +77,8 @@ function Energietechnik(level: number) {
       met: 0,
       kris: 400 * Math.pow(2, level),
       deut: 200 * Math.pow(2, level)
-    }
+    },
+    minResearchlabLevel: 1
   };
 }
 
@@ -118,7 +121,8 @@ function Impulstriebwerk(level: number) {
       met: 1000 * Math.pow(2, level),
       kris: 2000 * Math.pow(2, level),
       deut: 300 * Math.pow(2, level)
-    }
+    },
+    minResearchlabLevel: 2
   };
 }
 
@@ -206,8 +210,10 @@ function Astrophysik(level: number) {
     cost: {
       met: 100 * (0.5 + Math.round(40 * Math.pow(1.75, level - 1))),
       kris: 100 * (0.5 + Math.round(80 * Math.pow(1.75, level - 1))),
-      deut: 100 * (0.5 + Math.round(40 * Math.pow(1.75, level - 1)))
-    }
+      deut: 100 * (0.5 + Math.round(40 * Math.pow(1.75, level - 1))),
+      energy: 0
+    },
+    minResearchlabLevel: 3
   };
 }
 
@@ -267,13 +273,16 @@ function Astrophysik(level: number) {
 // }
 
 export const RESEARCH_ORDER: Research[] = [
+  // Forschungslabor (Stufe 1/1)
   Energietechnik(1),
   Computertechnik(1),
+  // Forschungslabor (Stufe 2/2)
   Impulstriebwerk(1),
-  Spionagetechnik(1),
   Impulstriebwerk(2),
-  Spionagetechnik(2),
   Impulstriebwerk(3),
+  // Forschungslabor (Stufe 3/3)
+  Spionagetechnik(1),
+  Spionagetechnik(2),
   Spionagetechnik(3),
   Astrophysik(1),
   Astrophysik(2),
@@ -282,5 +291,6 @@ export const RESEARCH_ORDER: Research[] = [
   order: index, // build order starting at 0 from array index
   ...research, // explicitly defined building variables
   hasBeenQueued: false, // defaults to false unless provided in object explicitly
-  queuedAt: null // defaults to null unless provided in object explicitly
+  queuedAt: null, // defaults to null unless provided in object explicitly
+  constructionType: 'research'
 }));
