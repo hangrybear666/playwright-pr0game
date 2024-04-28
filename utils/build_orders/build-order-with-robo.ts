@@ -1,4 +1,5 @@
 import { Building } from '../customTypes';
+import { RESEARCH_ORDER } from './research-order';
 
 function MetallmineCost(level: number) {
   return {
@@ -88,17 +89,18 @@ function DeuteriumtankCost(level: number) {
   };
 }
 // switch to research tab and wait for resource accumulation in between builds
-function ResearchOverride() {
+function ResearchOverride(index: number) {
   return {
-    name: 'Research Override',
+    name: RESEARCH_ORDER[index].name,
     researchOverride: true,
-    level: 0,
+    level: RESEARCH_ORDER[index].level,
     cost: {
       met: 0,
       kris: 0,
       deut: 0,
       energy: 0
-    }
+    },
+    constructionType: 'research'
   };
 }
 // Solarkraftwerk Kristallmine Deuteriumsynthetisierer Fusionskraftwerk Roboterfabrik Raumschiffwerft Metallspeicher Kristallspeicher Deuteriumtank Forschungslabor
@@ -256,7 +258,10 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: DeuteriumsynthetisiererCost(4)
   },
   {
-    ...ResearchOverride()
+    ...ResearchOverride(0)
+  },
+  {
+    ...ResearchOverride(1)
   },
   {
     name: 'Solarkraftwerk',
@@ -398,6 +403,6 @@ export const ROBO_BUILD_ORDER: Building[] = [
   ...building, // explicitly defined building variables
   hasBeenQueued: building.hasBeenQueued ? building.hasBeenQueued : false, // defaults to false unless provided in object explicitly
   queuedAt: building.queuedAt ? building.queuedAt : null, // defaults to null unless provided in object explicitly
-  constructionType: 'building',
+  constructionType: building.researchOverride ? 'research' : 'building',
   researchOverride: building.researchOverride ? true : false // switches to research in between builds
 }));

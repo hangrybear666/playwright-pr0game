@@ -15,6 +15,9 @@ export default defineConfig({
   globalSetup: './utils/pr0game-setup',
   globalTimeout: 0,
   timeout: 0,
+  expect: {
+    timeout: 8 * 1000
+  },
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -37,17 +40,18 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // {
-    //   name: 'chromium',
-    //   use: { ...devices['Desktop Chrome'] },
-    // },
     {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        ...(CustomBrowserContextOptions as any)
-      }
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      ...(CustomBrowserContextOptions as any)
     }
+    // {
+    //   name: 'firefox',
+    //   use: {
+    //     ...devices['Desktop Firefox'],
+    //     ...(CustomBrowserContextOptions as any)
+    //   }
+    // }
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },

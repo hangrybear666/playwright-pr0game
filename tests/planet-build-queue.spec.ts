@@ -1,23 +1,20 @@
 import { test, expect, Page } from '@playwright/test';
-import { randomDelay } from 'utils/sharedFunctions';
+import { extractLevelFromBuildingHeader, randomDelay } from 'utils/sharedFunctions';
 const jsdom = require('jsdom');
-import { Building } from 'utils/customTypes';
+import { Building, ConstructedBuildings, Research, Resources } from 'utils/customTypes';
 import fs from 'fs';
 import { parameters } from 'config/parameters';
 // import { BUILD_ORDER } from 'utils/build_orders/build-order';
 import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
+import { RESEARCH_ORDER } from 'utils/build_orders/research-order';
 
 test('start main planet build queue', async ({ page }) => {
   try {
     await page.goto(process.env.PROGAME_UNI_RELATIVE_PATH!);
     const userName = process.env.PROGAME_USERNAME!;
-    await expect(page.getByRole('link', { name: userName })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Metall[0-9\.\s]/ })).toBeVisible(); // Metall followed by whitespace, numbers or a dot
+    await expect(page.getByRole('link', { name: userName })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
+    await expect(page.getByRole('link', { name: /Metall[0-9\.\s]/ })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT }); // Metall followed by whitespace, numbers or a dot
 
-    await randomDelay(page); // wait a random time amount before page interaction
-    await page.getByRole('link', { name: 'Gebäude', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Rohstoffabbau' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Lagerung' })).toBeVisible();
     // Starts an infinite recursive loop acting as the building queue process based on available resources.
     let buildCompleted = false;
     let recursiveCallCount = 0;
@@ -49,7 +46,7 @@ test('start main planet build queue', async ({ page }) => {
  */
 async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
   // Extracts headers (name and level) for various building types from the provided building page.
-  await extractCurrentBuildingLevels(page);
+  const currentBuildings = await extractCurrentBuildingLevels(page);
   // fetch current resources since they could have changed since last execution
   const currentRes = await extractCurrentResourceCount(page);
 
@@ -64,8 +61,28 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
     //  | '__/ _ \/ __|/ _ \/ _` | '__/ __| '_ \    / _ \ \ / / _ \ '__| '__| |/ _` |/ _ \
     //  | | |  __/\__ \  __/ (_| | | | (__| | | |  | (_) \ V /  __/ |  | |  | | (_| |  __/
     //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|   \___/ \_/ \___|_|  |_|  |_|\__,_|\___|
-    await startResearchQueue(page, currentRes);
-    return;
+    await waitForResearchToStart(page, buildCompleted, recursiveCallCount, currentRes, currentBuildings);
+    // updates built-order with started research
+    queueBuilding(nextBuildingOrder, mergedBuildOrder);
+    // recursively calls itself to run another round after research queue has been started
+    recursiveCallCount++;
+    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+  }
+
+  if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
+    console.log('Trace: Navigating to building overview.');
+    await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
+    await randomDelay(page); // wait a random time amount before page interaction
+  } else {
+    console.log(`Trace: Currently on building page. Attempting to queue next building ${nextBuilding.name} ${nextBuilding.level}.`);
+    await randomDelay(page); // wait a random time amount before page interaction
+  }
+
+  // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
+  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible();
+  if (isQueueActive) {
+    await waitForActiveQueue(page);
+    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   }
 
   // Check for resource constraints
@@ -75,27 +92,21 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       nextBuilding.cost.kris <= currentRes.krisAvailable &&
       nextBuilding.cost.deut <= currentRes.deutAvailable
     ) {
-      if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
-        console.log('Trace: Navigating back to building overview.');
-        await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`);
-        await randomDelay(page); // wait a random time amount before page interaction
-      } else {
-        console.log(`Trace: Currently on building page and next building ${nextBuilding.name} ${nextBuilding.level} can be queued.`);
-        await randomDelay(page); // wait a random time amount before page interaction
-      }
       // Queue next Building
-      await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click();
+      await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click({ timeout: parameters.ACTION_TIMEOUT });
       // Expect Queue to become visible
       await expect(page.locator('#buildlist')).toBeVisible();
       // Expect Next Building to be in Position 1. in Queue
-      expect(
-        await page.locator(`div#buildlist div:has-text("1."):has-text("${nextBuilding.name} ${nextBuilding.level}") button.build_submit`).innerText()
-      ).toBe(`${nextBuilding.name} ${nextBuilding.level}`);
-      // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
-      await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
+      await expect(page.locator(`div#buildlist div:has-text("1."):has-text("${nextBuilding.name} ${nextBuilding.level}") button.build_submit`)).toHaveCount(1, {
+        timeout: parameters.ACTION_TIMEOUT
+      });
+      // Marks the next building in line as queued and updates the .json output file
       queueBuilding(nextBuildingOrder, mergedBuildOrder);
       // Notifies user of successful queue addition
       console.info(`INFO: Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
+      // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
+      await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
+      // expects queue progressbar to have data-time attribute
       expect(Number(await page.locator('div#progressbar').getAttribute('data-time'))).toBeGreaterThan(0);
       // Check building completion status in queue and call startBuildingQueue recursively after completion
       await refreshUntilQueueCompletion(buildCompleted, recursiveCallCount, page);
@@ -106,13 +117,14 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       //  |_.__/ \__,_|_|_|\__,_|   \___\___/|_| |_| |_| .__/|_|\___|\__\___|\__,_|
       //                                               |_|
       // recursively calls itself to run another round after building queue completion
-      await startBuildingQueue(buildCompleted, recursiveCallCount++, page);
+      recursiveCallCount++;
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     } else {
       console.log(
         // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Trace: Waiting for resources. Checking again in a couple minutes.
-Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > 0 ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > 0 ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none'}]`
+        `Trace: Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in a couple minutes.
+Missing: Met [${nextBuilding.cost.met > currentRes.metAvailable ? nextBuilding.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > currentRes.krisAvailable ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > currentRes.deutAvailable ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none'}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {
@@ -130,7 +142,7 @@ Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - currentRes.m
       //  | | |  __/ (__| | | |  __/ (__|   <   | | |  __/\__ \ (_) | |_| | | | (_|  __/  | (_| |\ V / (_| | | | (_| | |_) | | | | |_| |_| |
       //  |_|  \___|\___|_| |_|\___|\___|_|\_\  |_|  \___||___/\___/ \__,_|_|  \___\___|   \__,_| \_/ \__,_|_|_|\__,_|_.__/|_|_|_|\__|\__, |
       //                                                                                                                              |___/
-      await startBuildingQueue(buildCompleted, recursiveCallCount++, page);
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     }
   } else {
     const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${currentRes.energyAvailable}`;
@@ -139,8 +151,20 @@ Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - currentRes.m
   }
 }
 
+async function waitForActiveQueue(page: Page) {
+  const queueCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
+  console.info(`INFO: Active queue found. Waiting for ${queueCompletionTime} seconds.`);
+  await new Promise((resolve) => setTimeout(resolve, queueCompletionTime * 1000)); // Wait for queue to Complete
+  await randomDelay(page); // wait a random time amount before page interaction
+  await expect(page.locator(`div#buildlist div#progressbar`)).toBeHidden({
+    timeout: parameters.ACTION_TIMEOUT
+  });
+}
+
 /**
  * Check building completion in continuous intervals until it has finished building.
+ * @param {boolean} buildCompleted - Flag indicating if the build within this queue has completed.
+ * @param {number} recursiveCallCount - The queue number starting at 0.
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
  */
 async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
@@ -170,7 +194,7 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
       async () => {
         console.log(`Trace: Checking if build in queue ${recursiveCallCount} has finished...`);
         if (buildCompleted) {
-          console.debug('Trace: ENTER RECURSIVE FUNCTION CALL');
+          console.log('Trace: ENTER RECURSIVE FUNCTION CALL');
           resolve();
         } else {
           await randomPlayerInteraction(page);
@@ -185,9 +209,97 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
   buildCompleted = false;
 }
 
-async function startResearchQueue(page: Page, currentRes: any) {
-  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`);
-  console.log('RESEARCHING WITH ' + JSON.stringify(currentRes));
+/**
+ * Once research is initiazted, this function restarts the queue for as long as resources are missing.
+ * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
+ * @param {boolean} buildCompleted - Flag indicating if the build within the initial building queue has completed.
+ * @param {number} recursiveCallCount - The queue number of the initial building queue starting at 0.
+ * @param {Resources} currentRes available resources
+ * @param {ConstructedBuildings} currentBuildings available resources
+ * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
+ */
+async function waitForResearchToStart(
+  page: Page,
+  buildCompleted: boolean,
+  recursiveCallCount: number,
+  currentRes: Resources,
+  currentBuildings: ConstructedBuildings
+) {
+  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`, { timeout: parameters.ACTION_TIMEOUT });
+
+  // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
+  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible();
+  if (isQueueActive) {
+    await waitForActiveQueue(page);
+    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+  }
+
+  // Merge original build with already built order
+  let mergedResearchOrder: Research[];
+  mergedResearchOrder = mergeCurrentResearchOrderWithSource();
+  const nextResearchOrder = getNextResearchOrder(mergedResearchOrder);
+  const nextResearch = mergedResearchOrder[nextResearchOrder];
+  const researchLabLevel = extractLevelFromBuildingHeader(currentBuildings.forschungslabor);
+  if (researchLabLevel >= nextResearch.minResearchlabLevel) {
+    if (
+      nextResearch.cost.met <= currentRes.metAvailable &&
+      nextResearch.cost.kris <= currentRes.krisAvailable &&
+      nextResearch.cost.deut <= currentRes.deutAvailable
+    ) {
+      // Queue next Research
+      await page.locator(`div.infos:has-text("${nextResearch.name}") button.build_submit`).click({
+        timeout: parameters.ACTION_TIMEOUT
+      });
+      // Expect Queue to become visible
+      await expect(page.locator('#buildlist')).toBeVisible({
+        timeout: parameters.ACTION_TIMEOUT
+      });
+      // Expect Next Research to be in Position 1. in Queue
+      await expect(page.locator(`div#buildlist div:has-text("1."):has-text("${nextResearch.name} ${nextResearch.level}") button.build_submit`)).toHaveCount(1, {
+        timeout: parameters.ACTION_TIMEOUT
+      });
+      // Marks the next research in line as queued and updates the .json output file
+      queueResearch(nextResearchOrder, mergedResearchOrder);
+      // Notifies user of successful queue addition
+      console.info(`INFO: Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
+      // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
+      await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0, { timeout: parameters.ACTION_TIMEOUT });
+      //                                     _            _             _           _
+      //   _ __ ___  ___  ___  __ _ _ __ ___| |__     ___| |_ __ _ _ __| |_ ___  __| |
+      //  | '__/ _ \/ __|/ _ \/ _` | '__/ __| '_ \   / __| __/ _` | '__| __/ _ \/ _` |
+      //  | | |  __/\__ \  __/ (_| | | | (__| | | |  \__ \ || (_| | |  | ||  __/ (_| |
+      //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|  |___/\__\__,_|_|   \__\___|\__,_|
+      return;
+    } else {
+      console.log(
+        // Cost: Met [${nextResearch.cost.met}] Kris [${nextResearch.cost.kris}] Deut [${nextResearch.cost.deut}]
+        // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
+        `Trace: Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in a couple minutes.
+  Missing: Met [${nextResearch.cost.met > currentRes.metAvailable ? nextResearch.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextResearch.cost.kris > currentRes.krisAvailable ? nextResearch.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextResearch.cost.deut > currentRes.deutAvailable ? nextResearch.cost.deut - currentRes.deutAvailable : 'none'}]`
+      );
+      // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
+      await new Promise<void>((resolve) => {
+        setTimeout(
+          () => {
+            resolve();
+          },
+          parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
+            Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
+        );
+      });
+      //                 _               _                                                                  _ _       _     _ _ _ _
+      //   _ __ ___  ___| |__   ___  ___| | __   _ __ ___  ___  ___  _   _ _ __ ___ ___     __ ___   ____ _(_) | __ _| |__ (_) (_) |_ _   _
+      //  | '__/ _ \/ __| '_ \ / _ \/ __| |/ /  | '__/ _ \/ __|/ _ \| | | | '__/ __/ _ \   / _` \ \ / / _` | | |/ _` | '_ \| | | | __| | | |
+      //  | | |  __/ (__| | | |  __/ (__|   <   | | |  __/\__ \ (_) | |_| | | | (_|  __/  | (_| |\ V / (_| | | | (_| | |_) | | | | |_| |_| |
+      //  |_|  \___|\___|_| |_|\___|\___|_|\_\  |_|  \___||___/\___/ \__,_|_|  \___\___|   \__,_| \_/ \__,_|_|_|\__,_|_.__/|_|_|_|\__|\__, |
+      //                                                                                                                              |___/
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+    }
+  } else {
+    const errorMsg = `ERROR: Minimum Research Lab level [${nextResearch.minResearchlabLevel}] but existing is [${researchLabLevel}]`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
 }
 
 /**
@@ -233,11 +345,27 @@ async function randomPlayerInteraction(page: Page) {
 }
 
 /**
- * loops through the build order and extracts mext value that hasn't yet been queued.
+ * loops through the build order and extracts next object that hasn't yet been queued.
  */
-function getNextBuildingOrder(buildings: Building[]): number {
+function getNextBuildingOrder(allBuildings: Building[]): number {
   let order;
-  buildings.every((e) => {
+  allBuildings.every((e) => {
+    if (!e.hasBeenQueued) {
+      order = e.order;
+      return false;
+    } else {
+      return true;
+    }
+  });
+  return order ? order : 1;
+}
+
+/**
+ * loops through the research order and extracts next object that hasn't yet been queued.
+ */
+function getNextResearchOrder(allResearch: Research[]): number {
+  let order;
+  allResearch.every((e) => {
     if (!e.hasBeenQueued) {
       order = e.order;
       return false;
@@ -253,12 +381,12 @@ function getNextBuildingOrder(buildings: Building[]): number {
  * @param {Building[]} updatedBuildOrder
  * @param {string} path
  */
-function writeJSONToFile(updatedBuildOrder: Building[], path: string) {
+function writeJSONToFile(updatedBuildOrder: Building[] | Research[], path: string) {
   fs.writeFile(path, JSON.stringify(updatedBuildOrder, null, 2), (err) => {
     if (err) {
       console.error("ERROR: Couldn't write JSON file: ", err);
     } else {
-      console.log('Trace: Updated built-order at:', path);
+      console.log('Trace: Updated construction log at:', path);
     }
   });
 }
@@ -266,7 +394,7 @@ function writeJSONToFile(updatedBuildOrder: Building[], path: string) {
  * Marks the next building in line as queued and updates the .json output file.
  * Receives a merged build order and the index of the next building to queue.
  * @param index index within build order array
- * @param buildOrder merged build order with updated hasBeenQueued and queuedAt0 values
+ * @param buildOrder merged build order with updated hasBeenQueued and queuedAt values
  */
 function queueBuilding(index: number, buildOrder: Building[]) {
   if (index >= 0 && index < buildOrder.length) {
@@ -276,16 +404,44 @@ function queueBuilding(index: number, buildOrder: Building[]) {
       buildOrder[index].queuedAt = new Date();
       writeJSONToFile(buildOrder, './storage/built-order.json'); // Write updated data to JSON file
     } else {
-      console.error('ERROR: Building has already been queued.');
+      const errorMsg = 'ERROR: Building has already been queued.';
+      console.error(errorMsg);
+      throw Error(errorMsg);
     }
   } else {
-    console.error('ERROR: Invalid building index.');
+    const errorMsg = 'ERROR: Invalid building index.';
+    console.error(errorMsg);
+    throw Error(errorMsg);
   }
 }
 
 /**
+ * Marks the next research in line as queued and updates the .json output file.
+ * Receives a merged research order and the index of the next research to queue.
+ * @param index index within research order array
+ * @param buildOrder merged research order with updated hasBeenQueued and queuedAt values
+ */
+function queueResearch(index: number, queueOrder: Research[]) {
+  if (index >= 0 && index < queueOrder.length) {
+    const building = queueOrder[index];
+    if (!building.hasBeenQueued) {
+      queueOrder[index].hasBeenQueued = true;
+      queueOrder[index].queuedAt = new Date();
+      writeJSONToFile(queueOrder, './storage/researched-order.json'); // Write updated data to JSON file
+    } else {
+      const errorMsg = 'ERROR: Research has already been queued.';
+      console.error(errorMsg);
+      throw Error(errorMsg);
+    }
+  } else {
+    const errorMsg = 'ERROR: Invalid research index.';
+    console.error(errorMsg);
+    throw Error(errorMsg);
+  }
+}
+/**
  * Merges the original Build oder with the written .json output build order created by this program.
- * Updates values are:
+ * Updated values are:
  * - hasBeenQueued
  * - queuedAt
  * @returns source build order with updated values for queued status
@@ -310,13 +466,43 @@ function mergeCurrentBuildOrderWithSource() {
 }
 
 /**
+ * Merges the original Research oder with the written .json output research order created by this program.
+ * Updated values are:
+ * - hasBeenQueued
+ * - queuedAt
+ * @returns source research order with updated values for queued status
+ */
+function mergeCurrentResearchOrderWithSource() {
+  const updatedResearchOrderData: Research[] = JSON.parse(fs.readFileSync('./storage/researched-order.json', 'utf-8'));
+  const mergedResearchOrder: Research[] = RESEARCH_ORDER.map((originalResearch, index) => {
+    let updatedResearch;
+    if (index < updatedResearchOrderData.length) {
+      updatedResearch = updatedResearchOrderData[index];
+    }
+    const mergedData = {
+      ...originalResearch,
+      ...(updatedResearch && {
+        hasBeenQueued: updatedResearch.hasBeenQueued,
+        queuedAt: updatedResearch.queuedAt
+      })
+    };
+    return mergedData;
+  });
+  return mergedResearchOrder;
+}
+
+/**
  *
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
  * @returns
  */
-async function extractCurrentResourceCount(page: Page) {
-  // refresh page for current prices
-  await page.reload();
+async function extractCurrentResourceCount(page: Page): Promise<Resources> {
+  // navigate to empire instead of refreshing for current prices because page.reload is fucked in playwright
+  // await new Promise((resolve) => setTimeout(resolve, 2500)); // Add a delay of 2.5 seconds before page reload to avoid weird playwright behavior
+  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`, { timeout: parameters.ACTION_TIMEOUT });
+  // await new Promise((resolve) => setTimeout(resolve, 2500)); // Add a delay of 2.5 seconds before page reload to avoid weird playwright behavior
+  // wait for 2 seconds to avoid erratic behavior when extracting dom node attributes
+  await expect(page.locator('#current_metal')).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
   const metAmt = await page.locator('#current_metal').getAttribute('data-real');
   const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
   const deutAmt = await page.locator('#current_deuterium').getAttribute('data-real');
@@ -343,8 +529,11 @@ async function extractCurrentResourceCount(page: Page) {
  * Extracts headers (name and level) for various building types from the provided building page.
  * @param {Page} page - The Playwright Page object representing the webpage to extract from.
  * @throws {Error} - If there are any issues during the extraction process.
+ * @returns {ConstructedBuildings} currentBuildings Object
  */
-async function extractCurrentBuildingLevels(page: Page) {
+async function extractCurrentBuildingLevels(page: Page): Promise<ConstructedBuildings> {
+  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
+  await expect(page.getByRole('button', { name: 'Rohstoffabbau' })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
   const metallmineHeader = await page
     .locator('div[class="buildn"]')
     .and(page.getByText(/Metallmine(?:\s*\(Stufe\s*\d{1,2}\))?/g))
@@ -385,16 +574,22 @@ async function extractCurrentBuildingLevels(page: Page) {
     .locator('div[class="buildn"]')
     .and(page.getByText(/Deuteriumtank(?:\s*\(Stufe\s*\d{1,2}\))?/g))
     .allInnerTexts();
-  // TODO something with the header values
-  console.info('INFO: Current building levels:');
-  console.log(metallmineHeader);
-  console.log(solarkraftwerkHeader);
-  console.log(kristallmineHeader);
-  console.log(deuteriumsynthetisiererHeader);
-  console.log(roboterfabrikHeader);
-  console.log(raumschiffwerftHeader);
-  console.log(forschungslaborHeader);
-  console.log(metallspeicherHeader);
-  console.log(kristallspeicherHeader);
-  console.log(deuteriumtankHeader);
+  const currentBuildings: ConstructedBuildings = {
+    metallmine: metallmineHeader[0],
+    solarkraftwerk: solarkraftwerkHeader[0],
+    kristallmine: kristallmineHeader[0],
+    deuteriumsynthetisierer: deuteriumsynthetisiererHeader[0],
+    roboterfabrik: roboterfabrikHeader[0],
+    raumschiffwerft: raumschiffwerftHeader[0],
+    forschungslabor: forschungslaborHeader[0],
+    metallspeicher: metallspeicherHeader[0],
+    kristallspeicher: kristallspeicherHeader[0],
+    deuteriumtank: deuteriumtankHeader[0]
+  };
+  let currentBuildingOverviewString: string = '';
+  Object.keys(currentBuildings).forEach((e, i, arr) => {
+    currentBuildingOverviewString += currentBuildings[e].concat(i < arr.length - 1 ? ' | ' : '');
+  });
+  console.info('INFO: Current building levels: ' + currentBuildingOverviewString);
+  return currentBuildings;
 }

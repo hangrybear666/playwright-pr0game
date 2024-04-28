@@ -16,3 +16,16 @@ export const getRandomDelayBetweenMiliseconds = (min: number, max: number) => {
     return delay;
   }
 };
+
+export function extractLevelFromBuildingHeader(str: string): number {
+  const regex = /\d+/; // Matches one or more digits
+  const match = str.match(regex);
+
+  if (match) {
+    const number = parseInt(match[0]); // Convert matched string to an integer
+    return number;
+  } else {
+    console.log(`Trace: No Building Level found in ${str}. Defaulting to level 0.`);
+    return 0;
+  }
+}

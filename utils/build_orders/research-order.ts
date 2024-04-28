@@ -274,8 +274,8 @@ function Astrophysik(level: number) {
 
 export const RESEARCH_ORDER: Research[] = [
   // Forschungslabor (Stufe 1/1)
-  Energietechnik(1),
   Computertechnik(1),
+  Energietechnik(1),
   // Forschungslabor (Stufe 2/2)
   Impulstriebwerk(1),
   Impulstriebwerk(2),

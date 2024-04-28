@@ -1,4 +1,5 @@
 import { Building } from '../customTypes';
+import { RESEARCH_ORDER } from './research-order';
 
 function MetallmineCost(level: number) {
   return {
@@ -88,17 +89,18 @@ function DeuteriumtankCost(level: number) {
   };
 }
 // switch to research tab and wait for resource accumulation in between builds
-function ResearchOverride() {
+function ResearchOverride(index: number) {
   return {
-    name: 'Research Override',
+    name: RESEARCH_ORDER[index].name,
     researchOverride: true,
-    level: 0,
+    level: RESEARCH_ORDER[index].level,
     cost: {
       met: 0,
       kris: 0,
       deut: 0,
       energy: 0
-    }
+    },
+    constructionType: 'research'
   };
 }
 // Solarkraftwerk Kristallmine Deuteriumsynthetisierer Fusionskraftwerk Roboterfabrik Raumschiffwerft Metallspeicher Kristallspeicher Deuteriumtank Forschungslabor
@@ -227,9 +229,6 @@ export const BUILD_ORDER: Building[] = [
     cost: DeuteriumsynthetisiererCost(4)
   },
   {
-    ...ResearchOverride()
-  },
-  {
     name: 'Solarkraftwerk',
     level: 9,
     cost: SolarkraftwerkCost(9)
@@ -253,6 +252,12 @@ export const BUILD_ORDER: Building[] = [
     name: 'Forschungslabor',
     level: 1,
     cost: ForschungslaborCost(1)
+  },
+  {
+    ...ResearchOverride(0)
+  },
+  {
+    ...ResearchOverride(1)
   },
   {
     name: 'Raumschiffwerft',
@@ -350,6 +355,14 @@ export const BUILD_ORDER: Building[] = [
     cost: DeuteriumtankCost(1)
   },
   {
+    name: 'Forschungslabor',
+    level: 2,
+    cost: ForschungslaborCost(1)
+  },
+  {
+    ...ResearchOverride(2)
+  },
+  {
     name: 'Solarkraftwerk',
     level: 14,
     cost: SolarkraftwerkCost(14)
@@ -365,6 +378,9 @@ export const BUILD_ORDER: Building[] = [
     cost: KristallmineCost(10)
   },
   {
+    ...ResearchOverride(3)
+  },
+  {
     name: 'Deuteriumsynthetisierer',
     level: 8,
     cost: DeuteriumsynthetisiererCost(8)
@@ -378,12 +394,29 @@ export const BUILD_ORDER: Building[] = [
     name: 'Kristallspeicher',
     level: 2,
     cost: KristallspeicherCost(2)
+  },
+  {
+    ...ResearchOverride(4)
+  },
+  {
+    name: 'Forschungslabor',
+    level: 2,
+    cost: ForschungslaborCost(1)
+  },
+  {
+    ...ResearchOverride(5)
+  },
+  {
+    ...ResearchOverride(6)
+  },
+  {
+    ...ResearchOverride(7)
   }
 ].map((building, index) => ({
   order: index, // build order starting at 0 from array index
   ...building, // explicitly defined building variables
   hasBeenQueued: building.hasBeenQueued ? building.hasBeenQueued : false, // defaults to false unless provided in object explicitly
   queuedAt: building.queuedAt ? building.queuedAt : null, // defaults to null unless provided in object explicitly
-  constructionType: 'building',
+  constructionType: building.researchOverride ? 'research' : 'building',
   researchOverride: building.researchOverride ? true : false
 }));

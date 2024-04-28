@@ -6,7 +6,7 @@
 - Reinitialize Session after timeout within any interaction. Maybe by catching the error and calling the setup again.
 
 ### Medium Prio
-- asd
+- Make timeouts of expects work even though the test has no timeout itself. Either give each expect an individual timeout, or find a global solution.
 
 ### Low Prio
 - asd

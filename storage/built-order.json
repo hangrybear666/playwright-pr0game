@@ -13,6 +13,7 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
+    "researchOverride": false,
     "constructionType": "building"
   },
   {
@@ -28,7 +29,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 2,
@@ -44,7 +46,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 3,
@@ -59,7 +62,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 4,
@@ -73,7 +77,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 5,
@@ -87,7 +92,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 6,
@@ -103,7 +109,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 7,
@@ -117,7 +124,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:24:23.481Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 8,
@@ -132,7 +140,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:25:10.071Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 9,
@@ -147,7 +156,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:25:32.465Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 10,
@@ -162,7 +172,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:26:04.064Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 11,
@@ -178,7 +189,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:26:50.372Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 12,
@@ -193,7 +205,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:28:19.382Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 13,
@@ -208,7 +221,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:29:25.874Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 14,
@@ -224,7 +238,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:29:47.230Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 15,
@@ -239,7 +254,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:31:59.743Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 16,
@@ -254,7 +270,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:33:34.257Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 17,
@@ -269,7 +286,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:34:08.541Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 18,
@@ -285,7 +303,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:34:58.022Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 19,
@@ -300,7 +319,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:38:18.654Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 20,
@@ -315,7 +335,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:39:33.977Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 21,
@@ -331,7 +352,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:41:52.779Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 22,
@@ -346,7 +368,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:46:47.093Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 23,
@@ -361,7 +384,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T18:50:26.840Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 24,
@@ -377,7 +401,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T21:18:37.142Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 25,
@@ -392,7 +417,8 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T21:26:11.383Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 26,
@@ -407,10 +433,41 @@
     },
     "hasBeenQueued": true,
     "queuedAt": "2024-04-27T21:29:11.663Z",
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
     "order": 27,
+    "name": "Computertechnik",
+    "researchOverride": true,
+    "level": 1,
+    "cost": {
+      "met": 0,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T14:39:55.935Z"
+  },
+  {
+    "order": 28,
+    "name": "Energietechnik",
+    "researchOverride": true,
+    "level": 1,
+    "cost": {
+      "met": 0,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T15:39:55.935Z"
+  },
+  {
+    "order": 29,
     "name": "Solarkraftwerk",
     "level": 9,
     "cost": {
@@ -421,12 +478,13 @@
       "energyProduction": 81,
       "totalEnergyProduction": 424
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T15:45:18.677Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 28,
+    "order": 30,
     "name": "Deuteriumsynthetisierer",
     "level": 5,
     "cost": {
@@ -436,12 +494,13 @@
       "energy": 44,
       "totalEnergyConsumption": 161
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T16:12:58.587Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 29,
+    "order": 31,
     "name": "Raumschiffwerft",
     "level": 1,
     "cost": {
@@ -450,12 +509,13 @@
       "deut": 100,
       "energy": 0
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T16:19:39.079Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 30,
+    "order": 32,
     "name": "Kristallmine",
     "level": 6,
     "cost": {
@@ -465,12 +525,13 @@
       "energy": 25,
       "totalEnergyConsumption": 106
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T16:22:16.798Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 31,
+    "order": 33,
     "name": "Raumschiffwerft",
     "level": 2,
     "cost": {
@@ -479,12 +540,13 @@
       "deut": 200,
       "energy": 0
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T16:25:46.176Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 32,
+    "order": 34,
     "name": "Solarkraftwerk",
     "level": 10,
     "cost": {
@@ -495,12 +557,13 @@
       "energyProduction": 95,
       "totalEnergyProduction": 519
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T16:30:59.552Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 33,
+    "order": 35,
     "name": "Deuteriumsynthetisierer",
     "level": 6,
     "cost": {
@@ -510,12 +573,13 @@
       "energy": 52,
       "totalEnergyConsumption": 213
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T19:19:33.053Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 34,
+    "order": 36,
     "name": "Metallmine",
     "level": 8,
     "cost": {
@@ -525,12 +589,13 @@
       "energy": 35,
       "totalEnergyConsumption": 171
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T19:29:30.308Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 35,
+    "order": 37,
     "name": "Solarkraftwerk",
     "level": 11,
     "cost": {
@@ -541,12 +606,13 @@
       "energyProduction": 109,
       "totalEnergyProduction": 628
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T19:49:39.694Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 36,
+    "order": 38,
     "name": "Kristallmine",
     "level": 7,
     "cost": {
@@ -556,12 +622,13 @@
       "energy": 30,
       "totalEnergyConsumption": 136
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building"
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-28T20:24:33.035Z",
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 37,
+    "order": 39,
     "name": "Metallmine",
     "level": 9,
     "cost": {
@@ -573,10 +640,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 38,
+    "order": 40,
     "name": "Metallmine",
     "level": 10,
     "cost": {
@@ -588,10 +656,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 39,
+    "order": 41,
     "name": "Solarkraftwerk",
     "level": 12,
     "cost": {
@@ -604,10 +673,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 40,
+    "order": 42,
     "name": "Kristallmine",
     "level": 8,
     "cost": {
@@ -619,10 +689,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 41,
+    "order": 43,
     "name": "Deuteriumsynthetisierer",
     "level": 7,
     "cost": {
@@ -634,10 +705,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 42,
+    "order": 44,
     "name": "Solarkraftwerk",
     "level": 13,
     "cost": {
@@ -650,10 +722,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 43,
+    "order": 45,
     "name": "Metallmine",
     "level": 11,
     "cost": {
@@ -665,10 +738,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 44,
+    "order": 46,
     "name": "Kristallmine",
     "level": 9,
     "cost": {
@@ -680,10 +754,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 45,
+    "order": 47,
     "name": "Metallspeicher",
     "level": 1,
     "cost": {
@@ -694,10 +769,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 46,
+    "order": 48,
     "name": "Kristallspeicher",
     "level": 1,
     "cost": {
@@ -708,10 +784,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 47,
+    "order": 49,
     "name": "Deuteriumtank",
     "level": 1,
     "cost": {
@@ -722,10 +799,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 48,
+    "order": 50,
     "name": "Solarkraftwerk",
     "level": 14,
     "cost": {
@@ -738,10 +816,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 49,
+    "order": 51,
     "name": "Metallmine",
     "level": 12,
     "cost": {
@@ -753,10 +832,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 50,
+    "order": 52,
     "name": "Kristallmine",
     "level": 10,
     "cost": {
@@ -768,10 +848,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 51,
+    "order": 53,
     "name": "Deuteriumsynthetisierer",
     "level": 8,
     "cost": {
@@ -783,10 +864,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 52,
+    "order": 54,
     "name": "Metallspeicher",
     "level": 2,
     "cost": {
@@ -797,10 +879,11 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   },
   {
-    "order": 53,
+    "order": 55,
     "name": "Kristallspeicher",
     "level": 2,
     "cost": {
@@ -811,6 +894,7 @@
     },
     "hasBeenQueued": false,
     "queuedAt": null,
-    "constructionType": "building"
+    "constructionType": "building",
+    "researchOverride": false
   }
 ]
