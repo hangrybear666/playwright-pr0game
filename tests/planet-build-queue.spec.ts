@@ -9,7 +9,7 @@ import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 
 test('start main planet build queue', async ({ page }) => {
   try {
-    await page.goto('/uni4/game.php');
+    await page.goto(process.env.PROGAME_UNI_RELATIVE_PATH!);
     const userName = process.env.PROGAME_USERNAME!;
     await expect(page.getByRole('link', { name: userName })).toBeVisible();
     await expect(page.getByRole('link', { name: /Metall[0-9\.\s]/ })).toBeVisible(); // Metall followed by whitespace, numbers or a dot
@@ -18,8 +18,6 @@ test('start main planet build queue', async ({ page }) => {
     await page.getByRole('link', { name: 'Gebäude', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Rohstoffabbau' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Lagerung' })).toBeVisible();
-    // Extracts headers (name and level) for various building types from the provided building page.
-    await extractCurrentBuildingLevels(page);
     // Starts an infinite recursive loop acting as the building queue process based on available resources.
     let buildCompleted = false;
     let recursiveCallCount = 0;
@@ -40,36 +38,6 @@ test('start main planet build queue', async ({ page }) => {
 });
 
 /**
- *
- * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
- * @returns
- */
-async function extractCurrentResourceCount(page: Page) {
-  // refresh page for current prices
-  await page.reload();
-  const metAmt = await page.locator('#current_metal').getAttribute('data-real');
-  const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
-  const deutAmt = await page.locator('#current_deuterium').getAttribute('data-real');
-  const energieHtml = await page.getByRole('link', { name: /Energie[0-9\.\/\s]/ }).innerHTML(); // Energie followed by whitespace, numbers, a dot or backslash
-  const { JSDOM } = jsdom;
-  const energyDOM = new JSDOM(energieHtml);
-  const energyDocument: Document = energyDOM.window.document;
-  const energySpans = energyDocument.querySelectorAll('span');
-  let energieAmt: string = '';
-  energySpans.forEach((e) => {
-    if (e.textContent?.includes('/')) {
-      energieAmt = e.textContent.split('/')[0];
-    }
-  });
-  const metAvailable = metAmt ? parseInt(metAmt) : 0;
-  const krisAvailable = krisAmt ? parseInt(krisAmt) : 0;
-  const deutAvailable = deutAmt ? parseInt(deutAmt) : 0;
-  const energyAvailable = energieAmt ? parseInt(energieAmt) : 0;
-  console.log(`Trace: Resource Availability: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}] Energy [${energyAvailable}]`);
-  return { metAvailable, krisAvailable, deutAvailable, energyAvailable };
-}
-
-/**
  * Starts an infinite recursive loop acting as the building queue process based on available resources.
  * It merges the original Build oder with the written .json output build order created by this program.
  * Then it starts a build, updates the build order output file and checks in set intervals for build completion.
@@ -80,24 +48,36 @@ async function extractCurrentResourceCount(page: Page) {
  * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
  */
 async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+  // Extracts headers (name and level) for various building types from the provided building page.
+  await extractCurrentBuildingLevels(page);
   // fetch current resources since they could have changed since last execution
   const currentRes = await extractCurrentResourceCount(page);
-  let metAvailable: number = currentRes.metAvailable;
-  let krisAvailable: number = currentRes.krisAvailable;
-  let deutAvailable: number = currentRes.deutAvailable;
-  let energyAvailable: number = currentRes.energyAvailable;
+
   // Merge original build with already built order
   let mergedBuildOrder: Building[];
   mergedBuildOrder = mergeCurrentBuildOrderWithSource();
   const nextBuildingOrder = getNextBuildingOrder(mergedBuildOrder);
   const nextBuilding = mergedBuildOrder[nextBuildingOrder];
+  if (nextBuilding.researchOverride) {
+    //                                     _                                 _     _
+    //   _ __ ___  ___  ___  __ _ _ __ ___| |__      _____   _____ _ __ _ __(_) __| | ___
+    //  | '__/ _ \/ __|/ _ \/ _` | '__/ __| '_ \    / _ \ \ / / _ \ '__| '__| |/ _` |/ _ \
+    //  | | |  __/\__ \  __/ (_| | | | (__| | | |  | (_) \ V /  __/ |  | |  | | (_| |  __/
+    //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|   \___/ \_/ \___|_|  |_|  |_|\__,_|\___|
+    await startResearchQueue(page, currentRes);
+    return;
+  }
 
   // Check for resource constraints
-  if (nextBuilding.cost.energy <= energyAvailable + parameters.ENERGY_DEFICIT_ALLOWED) {
-    if (nextBuilding.cost.met <= metAvailable && nextBuilding.cost.kris <= krisAvailable && nextBuilding.cost.deut <= deutAvailable) {
+  if (nextBuilding.cost.energy <= currentRes.energyAvailable + parameters.ENERGY_DEFICIT_ALLOWED) {
+    if (
+      nextBuilding.cost.met <= currentRes.metAvailable &&
+      nextBuilding.cost.kris <= currentRes.krisAvailable &&
+      nextBuilding.cost.deut <= currentRes.deutAvailable
+    ) {
       if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
         console.log('Trace: Navigating back to building overview.');
-        await page.goto('/uni4/game.php?page=buildings');
+        await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`);
         await randomDelay(page); // wait a random time amount before page interaction
       } else {
         console.log(`Trace: Currently on building page and next building ${nextBuilding.name} ${nextBuilding.level} can be queued.`);
@@ -132,7 +112,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
         // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
         `Trace: Waiting for resources. Checking again in a couple minutes.
-Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > 0 ? nextBuilding.cost.kris - krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > 0 ? nextBuilding.cost.deut - deutAvailable : 'none'}]`
+Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > 0 ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > 0 ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none'}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {
@@ -153,7 +133,7 @@ Missing: Met [${nextBuilding.cost.met > 0 ? nextBuilding.cost.met - metAvailable
       await startBuildingQueue(buildCompleted, recursiveCallCount++, page);
     }
   } else {
-    const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${energyAvailable}`;
+    const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${currentRes.energyAvailable}`;
     console.error(errorMsg);
     throw Error(errorMsg);
   }
@@ -205,6 +185,11 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
   buildCompleted = false;
 }
 
+async function startResearchQueue(page: Page, currentRes: any) {
+  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`);
+  console.log('RESEARCHING WITH ' + JSON.stringify(currentRes));
+}
+
 /**
  * simulates player interactions and is called in semi-random time amounts to not idle until queue completion.
  * @param page
@@ -219,27 +204,27 @@ async function randomPlayerInteraction(page: Page) {
       break;
     case 2:
       console.log('Trace: Navigating to Imperium View.');
-      await page.goto('/uni4/game.php?page=Empire');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`);
       break;
     case 3:
       console.log('Trace: Navigating to Research View.');
-      await page.goto('/uni4/game.php?page=research');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`);
       break;
     case 4:
       console.log('Trace: Navigating to Overview.');
-      await page.goto('/uni4/game.php?page=overview');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=overview`);
       break;
     case 5:
       console.log('Trace: Navigating to Tech Tree.');
-      await page.goto('/uni4/game.php?page=techtree');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=techtree`);
       break;
     case 5:
       console.log('Trace: Navigating to Galaxy.');
-      await page.goto('/uni4/game.php?page=galaxy');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=galaxy`);
       break;
     case 6:
       console.log('Trace: Navigating to Building Overview.');
-      await page.goto('/uni4/game.php?page=buildings');
+      await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`);
       break;
     default:
       console.log('Trace: Do Nothing.');
@@ -322,6 +307,36 @@ function mergeCurrentBuildOrderWithSource() {
     return mergedData;
   });
   return mergedBuildOrder;
+}
+
+/**
+ *
+ * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
+ * @returns
+ */
+async function extractCurrentResourceCount(page: Page) {
+  // refresh page for current prices
+  await page.reload();
+  const metAmt = await page.locator('#current_metal').getAttribute('data-real');
+  const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
+  const deutAmt = await page.locator('#current_deuterium').getAttribute('data-real');
+  const energieHtml = await page.getByRole('link', { name: /Energie[0-9\.\/\s]/ }).innerHTML(); // Energie followed by whitespace, numbers, a dot or backslash
+  const { JSDOM } = jsdom;
+  const energyDOM = new JSDOM(energieHtml);
+  const energyDocument: Document = energyDOM.window.document;
+  const energySpans = energyDocument.querySelectorAll('span');
+  let energieAmt: string = '';
+  energySpans.forEach((e) => {
+    if (e.textContent?.includes('/')) {
+      energieAmt = e.textContent.split('/')[0];
+    }
+  });
+  const metAvailable = metAmt ? parseInt(metAmt) : 0;
+  const krisAvailable = krisAmt ? parseInt(krisAmt) : 0;
+  const deutAvailable = deutAmt ? parseInt(deutAmt) : 0;
+  const energyAvailable = energieAmt ? parseInt(energieAmt) : 0;
+  console.log(`Trace: Resource Availability: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}] Energy [${energyAvailable}]`);
+  return { metAvailable, krisAvailable, deutAvailable, energyAvailable };
 }
 
 /**

@@ -33,6 +33,7 @@ export type Research = BaseConstruct & {
 };
 
 export type Building = BaseConstruct & {
+  researchOverride: boolean;
   cost: BaseCost & {
     energy: number;
     energyProduction?: number;
@@ -41,7 +42,7 @@ export type Building = BaseConstruct & {
   };
 };
 
-export type Ships = BaseConstruct & {
+export type Ship = BaseConstruct & {
   cost: BaseCost;
 };
 export type Defense = BaseConstruct & {
