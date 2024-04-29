@@ -638,8 +638,8 @@
       "energy": 41,
       "totalEnergyConsumption": 212
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T16:27:22.763Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -654,8 +654,8 @@
       "energy": 47,
       "totalEnergyConsumption": 259
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T16:35:49.734Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -671,8 +671,8 @@
       "energyProduction": 125,
       "totalEnergyProduction": 753
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T16:47:31.106Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -687,8 +687,8 @@
       "energy": 35,
       "totalEnergyConsumption": 171
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T17:23:59.569Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -703,8 +703,8 @@
       "energy": 60,
       "totalEnergyConsumption": 273
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T19:21:39.888Z",
     "constructionType": "building",
     "researchOverride": false
   },

@@ -38,3 +38,4 @@ reports/index.html
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/logs

@@ -7,6 +7,7 @@ import { parameters } from 'config/parameters';
 // import { BUILD_ORDER } from 'utils/build_orders/build-order';
 import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 import { RESEARCH_ORDER } from 'utils/build_orders/research-order';
+import { logger } from 'utils/logger';
 
 test('start main planet build queue', async ({ page }) => {
   try {
@@ -26,7 +27,7 @@ test('start main planet build queue', async ({ page }) => {
     //                              |_|
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   } catch (error: unknown) {
-    console.error(error);
+    logger.error(error);
     if (error instanceof Error) {
       // TODO handle error
     }
@@ -70,11 +71,11 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
   }
 
   if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
-    console.log('Trace: Navigating to building overview.');
+    logger.verbose('Navigating to building overview.');
     await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
     await randomDelay(page); // wait a random time amount before page interaction
   } else {
-    console.log(`Trace: Currently on building page. Attempting to queue next building ${nextBuilding.name} ${nextBuilding.level}.`);
+    logger.verbose(`Currently on building page. Attempting to queue next building ${nextBuilding.name} ${nextBuilding.level}.`);
     await randomDelay(page); // wait a random time amount before page interaction
   }
 
@@ -103,7 +104,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       // Marks the next building in line as queued and updates the .json output file
       queueBuilding(nextBuildingOrder, mergedBuildOrder);
       // Notifies user of successful queue addition
-      console.info(`INFO: Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
+      logger.info(`Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
       // expects queue progressbar to have data-time attribute
@@ -120,10 +121,11 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       recursiveCallCount++;
       await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     } else {
-      console.log(
+      // logger.missingResources(``)//TODO
+      logger.verbose(
         // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Trace: Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in a couple minutes.
+        `Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in a couple minutes.
 Missing: Met [${nextBuilding.cost.met > currentRes.metAvailable ? nextBuilding.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > currentRes.krisAvailable ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > currentRes.deutAvailable ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none'}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
@@ -145,15 +147,15 @@ Missing: Met [${nextBuilding.cost.met > currentRes.metAvailable ? nextBuilding.c
       await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     }
   } else {
-    const errorMsg = `ERROR: Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${currentRes.energyAvailable}`;
-    console.error(errorMsg);
+    const errorMsg = `Not enough energy provided for ${nextBuilding.name} Level ${nextBuilding.level}. Needed: ${nextBuilding.cost.energy}. Available: ${currentRes.energyAvailable}`;
+    logger.error(errorMsg);
     throw Error(errorMsg);
   }
 }
 
 async function waitForActiveQueue(page: Page) {
   const queueCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
-  console.info(`INFO: Active queue found. Waiting for ${queueCompletionTime} seconds.`);
+  logger.info(`Active queue found. Waiting for ${queueCompletionTime} seconds.`);
   await new Promise((resolve) => setTimeout(resolve, queueCompletionTime * 1000)); // Wait for queue to Complete
   await randomDelay(page); // wait a random time amount before page interaction
   await expect(page.locator(`div#buildlist div#progressbar`)).toBeHidden({
@@ -170,20 +172,20 @@ async function waitForActiveQueue(page: Page) {
 async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
   const buildCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
   const queueRunning = new Promise((resolve, reject) => {
-    if (buildCompletionTime <= 0) reject(new Error('ERROR: buildCompletionTime smaller than 1s: ' + buildCompletionTime));
+    if (buildCompletionTime <= 0) reject(new Error('buildCompletionTime smaller than 1s: ' + buildCompletionTime));
     setTimeout(() => {
-      resolve('INFO: Build completed after ' + buildCompletionTime + 's');
+      resolve(`Build completed after ${buildCompletionTime}s`);
     }, buildCompletionTime * 1000);
   });
   queueRunning.then(
     (queueCompletionMsg) => {
       // resolved
       buildCompleted = true;
-      console.info(queueCompletionMsg);
+      logger.info(queueCompletionMsg);
     },
     (error) => {
       // rejected
-      if (error instanceof Error) console.error('ERROR: queue has not successfully finished running: ' + error.message);
+      if (error instanceof Error) logger.error(`Queue has not successfully finished running:  + ${error.message}`);
       throw error;
     }
   );
@@ -192,9 +194,9 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
   await new Promise<void>((resolve) => {
     refreshIntervalId = setInterval(
       async () => {
-        console.log(`Trace: Checking if build in queue ${recursiveCallCount} has finished...`);
+        logger.verbose(`Checking if build in queue ${recursiveCallCount} has finished...`);
         if (buildCompleted) {
-          console.log('Trace: ENTER RECURSIVE FUNCTION CALL');
+          logger.debug('ENTER RECURSIVE FUNCTION CALL');
           resolve();
         } else {
           await randomPlayerInteraction(page);
@@ -261,7 +263,7 @@ async function waitForResearchToStart(
       // Marks the next research in line as queued and updates the .json output file
       queueResearch(nextResearchOrder, mergedResearchOrder);
       // Notifies user of successful queue addition
-      console.info(`INFO: Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
+      logger.info(`Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0, { timeout: parameters.ACTION_TIMEOUT });
       //                                     _            _             _           _
@@ -271,10 +273,10 @@ async function waitForResearchToStart(
       //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|  |___/\__\__,_|_|   \__\___|\__,_|
       return;
     } else {
-      console.log(
+      logger.verbose(
         // Cost: Met [${nextResearch.cost.met}] Kris [${nextResearch.cost.kris}] Deut [${nextResearch.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Trace: Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in a couple minutes.
+        `Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in a couple minutes.
   Missing: Met [${nextResearch.cost.met > currentRes.metAvailable ? nextResearch.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextResearch.cost.kris > currentRes.krisAvailable ? nextResearch.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextResearch.cost.deut > currentRes.deutAvailable ? nextResearch.cost.deut - currentRes.deutAvailable : 'none'}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
@@ -296,8 +298,8 @@ async function waitForResearchToStart(
       await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     }
   } else {
-    const errorMsg = `ERROR: Minimum Research Lab level [${nextResearch.minResearchlabLevel}] but existing is [${researchLabLevel}]`;
-    console.error(errorMsg);
+    const errorMsg = `Minimum Research Lab level [${nextResearch.minResearchlabLevel}] but existing is [${researchLabLevel}]`;
+    logger.error(errorMsg);
     throw new Error(errorMsg);
   }
 }
@@ -307,39 +309,39 @@ async function waitForResearchToStart(
  * @param page
  */
 async function randomPlayerInteraction(page: Page) {
-  console.log('Trace: Simulating erratic player interaction.');
+  logger.verbose('Simulating erratic player interaction.');
   const randomEvent = Math.floor(Math.random() * 7);
   switch (randomEvent) {
     case 1:
-      console.log('Trace: Refreshing current Page.');
+      logger.verbose('Refreshing current Page.');
       await page.reload();
       break;
     case 2:
-      console.log('Trace: Navigating to Imperium View.');
+      logger.verbose('Navigating to Imperium View.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`);
       break;
     case 3:
-      console.log('Trace: Navigating to Research View.');
+      logger.verbose('Navigating to Research View.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`);
       break;
     case 4:
-      console.log('Trace: Navigating to Overview.');
+      logger.verbose('Navigating to Overview.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=overview`);
       break;
     case 5:
-      console.log('Trace: Navigating to Tech Tree.');
+      logger.verbose('Navigating to Tech Tree.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=techtree`);
       break;
     case 5:
-      console.log('Trace: Navigating to Galaxy.');
+      logger.verbose('Navigating to Galaxy.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=galaxy`);
       break;
     case 6:
-      console.log('Trace: Navigating to Building Overview.');
+      logger.verbose('Navigating to Building Overview.');
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`);
       break;
     default:
-      console.log('Trace: Do Nothing.');
+      logger.verbose('Do Nothing.');
       break;
   }
 }
@@ -384,9 +386,9 @@ function getNextResearchOrder(allResearch: Research[]): number {
 function writeJSONToFile(updatedBuildOrder: Building[] | Research[], path: string) {
   fs.writeFile(path, JSON.stringify(updatedBuildOrder, null, 2), (err) => {
     if (err) {
-      console.error("ERROR: Couldn't write JSON file: ", err);
+      logger.error("Couldn't write JSON file: ", err);
     } else {
-      console.log('Trace: Updated construction log at:', path);
+      logger.verbose(`Updated construction log at: ${path}`);
     }
   });
 }
@@ -404,13 +406,13 @@ function queueBuilding(index: number, buildOrder: Building[]) {
       buildOrder[index].queuedAt = new Date();
       writeJSONToFile(buildOrder, './storage/built-order.json'); // Write updated data to JSON file
     } else {
-      const errorMsg = 'ERROR: Building has already been queued.';
-      console.error(errorMsg);
+      const errorMsg = 'Building has already been queued.';
+      logger.error(errorMsg);
       throw Error(errorMsg);
     }
   } else {
-    const errorMsg = 'ERROR: Invalid building index.';
-    console.error(errorMsg);
+    const errorMsg = 'Invalid building index.';
+    logger.error(errorMsg);
     throw Error(errorMsg);
   }
 }
@@ -429,13 +431,13 @@ function queueResearch(index: number, queueOrder: Research[]) {
       queueOrder[index].queuedAt = new Date();
       writeJSONToFile(queueOrder, './storage/researched-order.json'); // Write updated data to JSON file
     } else {
-      const errorMsg = 'ERROR: Research has already been queued.';
-      console.error(errorMsg);
+      const errorMsg = 'Research has already been queued.';
+      logger.error(errorMsg);
       throw Error(errorMsg);
     }
   } else {
-    const errorMsg = 'ERROR: Invalid research index.';
-    console.error(errorMsg);
+    const errorMsg = 'Invalid research index.';
+    logger.error(errorMsg);
     throw Error(errorMsg);
   }
 }
@@ -521,7 +523,7 @@ async function extractCurrentResourceCount(page: Page): Promise<Resources> {
   const krisAvailable = krisAmt ? parseInt(krisAmt) : 0;
   const deutAvailable = deutAmt ? parseInt(deutAmt) : 0;
   const energyAvailable = energieAmt ? parseInt(energieAmt) : 0;
-  console.log(`Trace: Resource Availability: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}] Energy [${energyAvailable}]`);
+  logger.currentResources(`Metall [${metAvailable}]\nKristall [${krisAvailable}] \nDeuterium [${deutAvailable}]\nEnergie [${energyAvailable}]`);
   return { metAvailable, krisAvailable, deutAvailable, energyAvailable };
 }
 
@@ -588,8 +590,8 @@ async function extractCurrentBuildingLevels(page: Page): Promise<ConstructedBuil
   };
   let currentBuildingOverviewString: string = '';
   Object.keys(currentBuildings).forEach((e, i, arr) => {
-    currentBuildingOverviewString += currentBuildings[e].concat(i < arr.length - 1 ? ' | ' : '');
+    currentBuildingOverviewString += currentBuildings[e].concat(i < arr.length - 1 ? '\n' : '');
   });
-  console.info('INFO: Current building levels: ' + currentBuildingOverviewString);
+  logger.buildingLevels(`${currentBuildingOverviewString}`);
   return currentBuildings;
 }
