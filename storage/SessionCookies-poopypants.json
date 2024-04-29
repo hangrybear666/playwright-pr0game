@@ -1,0 +1,35 @@
+{
+  "cookies": [
+    {
+      "name": "2Moons",
+      "value": "189ritfo3vnljmj78ufne8m053",
+      "domain": "pr0game.com",
+      "path": "/uni4/",
+      "expires": 1714475827.161789,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "lang",
+      "value": "de",
+      "domain": "pr0game.com",
+      "path": "/",
+      "expires": 1748992618.287876,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "uni",
+      "value": "4",
+      "domain": "pr0game.com",
+      "path": "/",
+      "expires": 1748992627.161867,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

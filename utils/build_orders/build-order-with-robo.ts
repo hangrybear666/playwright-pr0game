@@ -347,6 +347,21 @@ export const ROBO_BUILD_ORDER: Building[] = [
     ...ResearchOverride(2)
   },
   {
+    name: 'Metallspeicher',
+    level: 1,
+    cost: MetallspeicherCost(1)
+  },
+  {
+    name: 'Kristallspeicher',
+    level: 1,
+    cost: KristallspeicherCost(1)
+  },
+  {
+    name: 'Deuteriumtank',
+    level: 1,
+    cost: DeuteriumtankCost(1)
+  },
+  {
     ...ResearchOverride(3)
   },
   {
@@ -363,21 +378,6 @@ export const ROBO_BUILD_ORDER: Building[] = [
     name: 'Kristallmine',
     level: 9,
     cost: KristallmineCost(9)
-  },
-  {
-    name: 'Metallspeicher',
-    level: 1,
-    cost: MetallspeicherCost(1)
-  },
-  {
-    name: 'Kristallspeicher',
-    level: 1,
-    cost: KristallspeicherCost(1)
-  },
-  {
-    name: 'Deuteriumtank',
-    level: 1,
-    cost: DeuteriumtankCost(1)
   },
   {
     name: 'Solarkraftwerk',

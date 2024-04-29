@@ -22,7 +22,9 @@ const init = async () => {
   let sessionCookies;
   let isSessionReusable: boolean = false;
   try {
-    sessionCookies = await import('../storage/SessionCookies.json');
+    sessionCookies = await import(
+      `../storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
+    );
     const cookies = sessionCookies.cookies;
     context.addCookies(cookies as any);
     logger.http('Prior Session found. Testing validity...');
@@ -45,8 +47,10 @@ const init = async () => {
       const baseUrl = process.env.PROGAME_BASE_URL!;
       // Navigate to Login Page
       await page.goto(baseUrl);
-      const userEmail = process.env.PROGAME_EMAIL!;
-      const userPswd = process.env.PROGAME_PW!;
+      // preferably takes EMAIL address supplied in CLI npx command via cross-env, otherwise defaults to .env file
+      const userEmail = process.env.CLI_PROGAME_EMAIL ? process.env.CLI_PROGAME_EMAIL : process.env.PROGAME_EMAIL ? process.env.PROGAME_EMAIL : '';
+      // preferably takes PW address supplied in CLI npx command via cross-env, otherwise defaults to .env file
+      const userPswd = process.env.CLI_PROGAME_PW ? process.env.CLI_PROGAME_PW : process.env.PROGAME_PW ? process.env.PROGAME_PW : '';
       await expect(page).toHaveTitle(/pr0game/);
       await expect(page.getByRole('button', { name: 'Login' })).toBeVisible();
       await page.locator('#universe').selectOption('4');
@@ -57,16 +61,19 @@ const init = async () => {
       await randomDelay(page);
       // Attempt Login
       await page.getByRole('button', { name: 'Login' }).click();
-      const userName = process.env.PROGAME_USERNAME!;
+      // preferably takes PW address supplied in CLI npx command via cross-env, otherwise defaults to .env file
+      const userName = process.env.CLI_PROGAME_USERNAME ? process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? process.env.PROGAME_USERNAME : '';
       await expect(page.getByRole('link', { name: userName })).toBeVisible();
-      await page.context().storageState({ path: './storage/SessionCookies.json' });
+      await page.context().storageState({
+        path: `./storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
+      });
       logger.http('Login Successful. Session persisted in storage for later reuse.');
     } catch (error: unknown) {
       if (error instanceof Error) logger.error('ERROR: Establishing new session failed with: ' + error.message);
       throw error;
     }
   }
-  logger.info(`☑️ User [${process.env.PROGAME_USERNAME}] authenticated. Initializing Build Automation Procedure...`);
+  logger.info(`☑️ User [${process.env.PROGAME_USERNAME}] authenticated. Initializing Build Automation.`);
   await context.close();
 };
 

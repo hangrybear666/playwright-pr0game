@@ -182,7 +182,7 @@ async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCal
   const queueRunning = new Promise((resolve, reject) => {
     if (buildCompletionTime <= 0) reject(new Error('buildCompletionTime smaller than 1s: ' + buildCompletionTime));
     setTimeout(() => {
-      resolve(`Build completed after ${buildCompletionTime}s`);
+      resolve(`☑️ Build completed after ${buildCompletionTime}s`);
     }, buildCompletionTime * 1000);
   });
   queueRunning.then(
@@ -421,7 +421,10 @@ function queueBuilding(index: number, buildOrder: Building[]) {
     if (!building.hasBeenQueued) {
       buildOrder[index].hasBeenQueued = true;
       buildOrder[index].queuedAt = new Date();
-      writeJSONToFile(buildOrder, './storage/built-order.json'); // Write updated data to JSON file
+      writeJSONToFile(
+        buildOrder,
+        `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
+      ); // Write updated data to JSON file
     } else {
       const errorMsg = 'Building has already been queued.';
       logger.error(errorMsg);
@@ -446,7 +449,10 @@ function queueResearch(index: number, queueOrder: Research[]) {
     if (!building.hasBeenQueued) {
       queueOrder[index].hasBeenQueued = true;
       queueOrder[index].queuedAt = new Date();
-      writeJSONToFile(queueOrder, './storage/researched-order.json'); // Write updated data to JSON file
+      writeJSONToFile(
+        queueOrder,
+        `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
+      ); // Write updated data to JSON file
     } else {
       const errorMsg = 'Research has already been queued.';
       logger.error(errorMsg);
@@ -466,7 +472,12 @@ function queueResearch(index: number, queueOrder: Research[]) {
  * @returns source build order with updated values for queued status
  */
 function mergeCurrentBuildOrderWithSource() {
-  const updatedBuildOrderData: Building[] = JSON.parse(fs.readFileSync('./storage/built-order.json', 'utf-8'));
+  const updatedBuildOrderData: Building[] = JSON.parse(
+    fs.readFileSync(
+      `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`,
+      'utf-8'
+    )
+  );
   const mergedBuildOrder: Building[] = ROBO_BUILD_ORDER.map((originalBuilding, index) => {
     let updatedBuilding;
     if (index < updatedBuildOrderData.length) {
@@ -492,7 +503,12 @@ function mergeCurrentBuildOrderWithSource() {
  * @returns source research order with updated values for queued status
  */
 function mergeCurrentResearchOrderWithSource() {
-  const updatedResearchOrderData: Research[] = JSON.parse(fs.readFileSync('./storage/researched-order.json', 'utf-8'));
+  const updatedResearchOrderData: Research[] = JSON.parse(
+    fs.readFileSync(
+      `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`,
+      'utf-8'
+    )
+  );
   const mergedResearchOrder: Research[] = RESEARCH_ORDER.map((originalResearch, index) => {
     let updatedResearch;
     if (index < updatedResearchOrderData.length) {
