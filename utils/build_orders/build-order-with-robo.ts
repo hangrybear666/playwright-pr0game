@@ -339,6 +339,17 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: DeuteriumsynthetisiererCost(7)
   },
   {
+    name: 'Forschungslabor',
+    level: 2,
+    cost: ForschungslaborCost(2)
+  },
+  {
+    ...ResearchOverride(2)
+  },
+  {
+    ...ResearchOverride(3)
+  },
+  {
     name: 'Solarkraftwerk',
     level: 13,
     cost: SolarkraftwerkCost(13)

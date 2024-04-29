@@ -5,8 +5,7 @@ const userCharId = process.env.TELEGRAM_USER_CHAT_ID!;
 const bot = new TelegramBot(token, { polling: false, webHook: false, baseApiUrl: '', filepath: false, onlyFirstMatch: false, request: undefined });
 
 function sendBasicTelegramMessage(msg: string) {
-  // for custom emojis this might be necessary <tg-emoji emoji-id="5368324170671202286">✅</tg-emoji>
-  bot.sendMessage(userCharId, `✅ ${msg}`, { parse_mode: 'HTML' });
+  bot.sendMessage(userCharId, `${msg}`);
 }
 
 function sendErrorTelegramMessage(msg: string) {

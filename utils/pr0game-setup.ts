@@ -66,7 +66,7 @@ const init = async () => {
       throw error;
     }
   }
-  logger.info(`User ${process.env.PROGAME_USERNAME} authenticated. Initializing Build Automation Procedure.`);
+  logger.info(`☑️ User [${process.env.PROGAME_USERNAME}] authenticated. Initializing Build Automation Procedure...`);
   await context.close();
 };
 

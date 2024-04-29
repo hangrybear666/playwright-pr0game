@@ -37,8 +37,8 @@
       "deut": 600
     },
     "minResearchlabLevel": 2,
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T22:24:54.184Z",
     "constructionType": "research"
   },
   {

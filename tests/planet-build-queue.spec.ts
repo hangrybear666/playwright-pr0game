@@ -104,7 +104,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       // Marks the next building in line as queued and updates the .json output file
       queueBuilding(nextBuildingOrder, mergedBuildOrder);
       // Notifies user of successful queue addition
-      logger.info(`Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
+      logger.info(`🏗 Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
       // expects queue progressbar to have data-time attribute
@@ -121,12 +121,20 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       recursiveCallCount++;
       await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     } else {
-      // logger.missingResources(``)//TODO
+      const isMetMissing = nextBuilding.cost.met > currentRes.metAvailable;
+      const isKrisMissing = nextBuilding.cost.kris > currentRes.krisAvailable;
+      const isDeutMissing = nextBuilding.cost.deut > currentRes.deutAvailable;
+      const missingMet = isMetMissing ? nextBuilding.cost.met - currentRes.metAvailable : 'none';
+      const missingKris = isKrisMissing ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none';
+      const missingDeut = isDeutMissing ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none';
+      logger.info(
+        `⏳ Waiting. ${nextBuilding.name} ${nextBuilding.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
+      );
       logger.verbose(
         // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
         `Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in a couple minutes.
-Missing: Met [${nextBuilding.cost.met > currentRes.metAvailable ? nextBuilding.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextBuilding.cost.kris > currentRes.krisAvailable ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextBuilding.cost.deut > currentRes.deutAvailable ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none'}]`
+Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {
@@ -155,7 +163,7 @@ Missing: Met [${nextBuilding.cost.met > currentRes.metAvailable ? nextBuilding.c
 
 async function waitForActiveQueue(page: Page) {
   const queueCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
-  logger.info(`Active queue found. Waiting for ${queueCompletionTime} seconds.`);
+  logger.info(`⏳ Active queue found. Waiting for ${queueCompletionTime} seconds.`);
   await new Promise((resolve) => setTimeout(resolve, queueCompletionTime * 1000)); // Wait for queue to Complete
   await randomDelay(page); // wait a random time amount before page interaction
   await expect(page.locator(`div#buildlist div#progressbar`)).toBeHidden({
@@ -263,7 +271,7 @@ async function waitForResearchToStart(
       // Marks the next research in line as queued and updates the .json output file
       queueResearch(nextResearchOrder, mergedResearchOrder);
       // Notifies user of successful queue addition
-      logger.info(`Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
+      logger.info(`🧬 Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0, { timeout: parameters.ACTION_TIMEOUT });
       //                                     _            _             _           _
@@ -273,11 +281,20 @@ async function waitForResearchToStart(
       //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|  |___/\__\__,_|_|   \__\___|\__,_|
       return;
     } else {
+      const isMetMissing = nextResearch.cost.met > currentRes.metAvailable;
+      const isKrisMissing = nextResearch.cost.kris > currentRes.krisAvailable;
+      const isDeutMissing = nextResearch.cost.deut > currentRes.deutAvailable;
+      const missingMet = isMetMissing ? nextResearch.cost.met - currentRes.metAvailable : 'none';
+      const missingKris = isKrisMissing ? nextResearch.cost.kris - currentRes.krisAvailable : 'none';
+      const missingDeut = isDeutMissing ? nextResearch.cost.deut - currentRes.deutAvailable : 'none';
+      logger.info(
+        `⏳ Waiting. ${nextResearch.name} ${nextResearch.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
+      );
       logger.verbose(
         // Cost: Met [${nextResearch.cost.met}] Kris [${nextResearch.cost.kris}] Deut [${nextResearch.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
         `Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in a couple minutes.
-  Missing: Met [${nextResearch.cost.met > currentRes.metAvailable ? nextResearch.cost.met - currentRes.metAvailable : 'none'}] Kris [${nextResearch.cost.kris > currentRes.krisAvailable ? nextResearch.cost.kris - currentRes.krisAvailable : 'none'}] Deut [${nextResearch.cost.deut > currentRes.deutAvailable ? nextResearch.cost.deut - currentRes.deutAvailable : 'none'}]`
+  Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {

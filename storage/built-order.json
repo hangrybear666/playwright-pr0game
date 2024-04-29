@@ -710,6 +710,51 @@
   },
   {
     "order": 44,
+    "name": "Forschungslabor",
+    "level": 2,
+    "cost": {
+      "met": 400,
+      "kris": 800,
+      "deut": 400,
+      "energy": 0
+    },
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T22:19:28.137Z",
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 45,
+    "name": "Impulstriebwerk",
+    "researchOverride": true,
+    "level": 1,
+    "cost": {
+      "met": 0,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": true,
+    "queuedAt": "2024-04-29T22:24:54.197Z"
+  },
+  {
+    "order": 46,
+    "name": "Impulstriebwerk",
+    "researchOverride": true,
+    "level": 2,
+    "cost": {
+      "met": 0,
+      "kris": 0,
+      "deut": 0,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 47,
     "name": "Solarkraftwerk",
     "level": 13,
     "cost": {
@@ -726,7 +771,7 @@
     "researchOverride": false
   },
   {
-    "order": 45,
+    "order": 48,
     "name": "Metallmine",
     "level": 11,
     "cost": {
@@ -742,7 +787,7 @@
     "researchOverride": false
   },
   {
-    "order": 46,
+    "order": 49,
     "name": "Kristallmine",
     "level": 9,
     "cost": {
@@ -758,7 +803,7 @@
     "researchOverride": false
   },
   {
-    "order": 47,
+    "order": 50,
     "name": "Metallspeicher",
     "level": 1,
     "cost": {
@@ -773,7 +818,7 @@
     "researchOverride": false
   },
   {
-    "order": 48,
+    "order": 51,
     "name": "Kristallspeicher",
     "level": 1,
     "cost": {
@@ -788,7 +833,7 @@
     "researchOverride": false
   },
   {
-    "order": 49,
+    "order": 52,
     "name": "Deuteriumtank",
     "level": 1,
     "cost": {
@@ -803,7 +848,7 @@
     "researchOverride": false
   },
   {
-    "order": 50,
+    "order": 53,
     "name": "Solarkraftwerk",
     "level": 14,
     "cost": {
@@ -820,7 +865,7 @@
     "researchOverride": false
   },
   {
-    "order": 51,
+    "order": 54,
     "name": "Metallmine",
     "level": 12,
     "cost": {
@@ -836,7 +881,7 @@
     "researchOverride": false
   },
   {
-    "order": 52,
+    "order": 55,
     "name": "Kristallmine",
     "level": 10,
     "cost": {
@@ -852,7 +897,7 @@
     "researchOverride": false
   },
   {
-    "order": 53,
+    "order": 56,
     "name": "Deuteriumsynthetisierer",
     "level": 8,
     "cost": {
@@ -868,7 +913,7 @@
     "researchOverride": false
   },
   {
-    "order": 54,
+    "order": 57,
     "name": "Metallspeicher",
     "level": 2,
     "cost": {
@@ -883,7 +928,7 @@
     "researchOverride": false
   },
   {
-    "order": 55,
+    "order": 58,
     "name": "Kristallspeicher",
     "level": 2,
     "cost": {
