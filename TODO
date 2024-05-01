@@ -4,6 +4,7 @@
 
 ### High Prio
 - Reinitialize Session after timeout within any interaction. Maybe by catching the error and calling the setup again.
+- Test what happens if I spam the REST API endpoint with multiple start commands
 
 ### Medium Prio
 - Make timeouts of expects work even though the test has no timeout itself. Either give each expect an individual timeout, or find a global solution.

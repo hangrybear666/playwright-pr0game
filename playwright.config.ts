@@ -33,7 +33,7 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PROGAME_BASE_URL,
-    storageState: './storage/SessionCookies.json',
+    storageState: `./storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry'
   },

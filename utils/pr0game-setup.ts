@@ -16,30 +16,32 @@ const init = async () => {
     // }
   });
   const page = await context.newPage();
-  //   __   ___ ___  __          __        __      __   ___  __   __     __
-  //  |__) |__   |  |__) \ /    /  \ |    |  \    /__` |__  /__` /__` | /  \ |\ |
-  //  |  \ |___  |  |  \  |     \__/ |___ |__/    .__/ |___ .__/ .__/ | \__/ | \|
-  let sessionCookies;
-  let isSessionReusable: boolean = false;
   try {
-    sessionCookies = await import(
-      `../storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
-    );
-    const cookies = sessionCookies.cookies;
-    context.addCookies(cookies as any);
-    logger.http('Prior Session found. Testing validity...');
-    const dashboardUrl = process.env.PROGAME_DASHBOARD_URL!;
-    await page.goto(dashboardUrl);
-    if (page.url() === dashboardUrl) {
-      // Dashboard reached. old session is still valid
-      isSessionReusable = true;
-      logger.http('Stored Session is valid. Reusing prior cookies.');
-    }
-  } catch (error: unknown) {
-    if (error instanceof Error) logger.error('ERROR: Retrying old session failed with: ' + error.message);
-  }
-  if (!isSessionReusable) {
+    //   __   ___ ___  __          __        __      __   ___  __   __     __
+    //  |__) |__   |  |__) \ /    /  \ |    |  \    /__` |__  /__` /__` | /  \ |\ |
+    //  |  \ |___  |  |  \  |     \__/ |___ |__/    .__/ |___ .__/ .__/ | \__/ | \|
+    let sessionCookies;
+    let isSessionReusable: boolean = false;
+    const sessionCookiePath = `./storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`;
     try {
+      sessionCookies = await import(
+        // ! import requires 2 dots for relative navigation !
+        '.'.concat(sessionCookiePath)
+      );
+      const cookies = sessionCookies.cookies;
+      context.addCookies(cookies as any);
+      logger.http('Prior Session found. Testing validity...');
+      const dashboardUrl = process.env.PROGAME_DASHBOARD_URL!;
+      await page.goto(dashboardUrl);
+      if (page.url() === dashboardUrl) {
+        // Dashboard reached. old session is still valid
+        isSessionReusable = true;
+        logger.http('Stored Session is valid. Reusing prior cookies.');
+      }
+    } catch (error: unknown) {
+      logger.warn(`Old Session could not be restored.`);
+    }
+    if (!isSessionReusable) {
       //   ___  __  ___       __          __                ___          __   ___  __   __     __
       //  |__  /__`  |   /\  |__) |    | /__` |__|    |\ | |__  |  |    /__` |__  /__` /__` | /  \ |\ |
       //  |___ .__/  |  /~~\ |__) |___ | .__/ |  |    | \| |___ |/\|    .__/ |___ .__/ .__/ | \__/ | \|
@@ -48,9 +50,13 @@ const init = async () => {
       // Navigate to Login Page
       await page.goto(baseUrl);
       // preferably takes EMAIL address supplied in CLI npx command via cross-env, otherwise defaults to .env file
-      const userEmail = process.env.CLI_PROGAME_EMAIL ? process.env.CLI_PROGAME_EMAIL : process.env.PROGAME_EMAIL ? process.env.PROGAME_EMAIL : '';
+      const userEmail = process.env.CLI_PROGAME_EMAIL
+        ? process.env.CLI_PROGAME_EMAIL
+        : process.env.PROGAME_EMAIL_DEFAULT
+          ? process.env.PROGAME_EMAIL_DEFAULT
+          : '';
       // preferably takes PW address supplied in CLI npx command via cross-env, otherwise defaults to .env file
-      const userPswd = process.env.CLI_PROGAME_PW ? process.env.CLI_PROGAME_PW : process.env.PROGAME_PW ? process.env.PROGAME_PW : '';
+      const userPswd = process.env.CLI_PROGAME_PW ? process.env.CLI_PROGAME_PW : process.env.PROGAME_PW_DEFAULT ? process.env.PROGAME_PW_DEFAULT : '';
       await expect(page).toHaveTitle(/pr0game/);
       await expect(page.getByRole('button', { name: 'Login' })).toBeVisible();
       await page.locator('#universe').selectOption('4');
@@ -62,19 +68,33 @@ const init = async () => {
       // Attempt Login
       await page.getByRole('button', { name: 'Login' }).click();
       // preferably takes PW address supplied in CLI npx command via cross-env, otherwise defaults to .env file
-      const userName = process.env.CLI_PROGAME_USERNAME ? process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? process.env.PROGAME_USERNAME : '';
+      const userName = process.env.CLI_PROGAME_USERNAME
+        ? process.env.CLI_PROGAME_USERNAME
+        : process.env.PROGAME_USERNAME_DEFAULT
+          ? process.env.PROGAME_USERNAME_DEFAULT
+          : '';
       await expect(page.getByRole('link', { name: userName })).toBeVisible();
-      await page.context().storageState({
-        path: `./storage/SessionCookies${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
-      });
-      logger.http('Login Successful. Session persisted in storage for later reuse.');
-    } catch (error: unknown) {
-      if (error instanceof Error) logger.error('ERROR: Establishing new session failed with: ' + error.message);
+
+      if (page.url() === process.env.PROGAME_DASHBOARD_URL) {
+        await page.context().storageState({
+          path: sessionCookiePath
+        });
+        logger.http('Login Successful. Session persisted in storage for later reuse.');
+      } else {
+        throw Error('Not forwarded to Dashboard url after Login.');
+      }
+    }
+    logger.info(
+      `☑️ User [${process.env.CLI_PROGAME_USERNAME ? process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT}] authenticated. Initializing Build Automation.`
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      logger.error('Establishing new session failed: ' + error.message);
       throw error;
     }
+  } finally {
+    await context.close();
   }
-  logger.info(`☑️ User [${process.env.PROGAME_USERNAME}] authenticated. Initializing Build Automation.`);
-  await context.close();
 };
 
 export default init;

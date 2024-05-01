@@ -13,6 +13,11 @@ function sendErrorTelegramMessage(msg: string) {
   bot.sendMessage(userCharId, `❌ ${msg}`, { parse_mode: 'HTML' });
 }
 
+function sendWarnTelegramMessage(msg: string) {
+  // for custom emojis this might be necessary <tg-emoji emoji-id="5368324170671202286">⚠️</tg-emoji>
+  bot.sendMessage(userCharId, `⚠️ ${msg}`, { parse_mode: 'HTML' });
+}
+
 function sendBuildingLevelsTelegramMessage(msg: string) {
   bot.sendMessage(userCharId, `${msg}`, {
     entities: [
@@ -39,4 +44,4 @@ function sendCurrentResourcesTelegramMessage(msg: string) {
   });
 }
 
-export { sendBasicTelegramMessage, sendErrorTelegramMessage, sendBuildingLevelsTelegramMessage, sendCurrentResourcesTelegramMessage };
+export { sendBasicTelegramMessage, sendErrorTelegramMessage, sendBuildingLevelsTelegramMessage, sendCurrentResourcesTelegramMessage, sendWarnTelegramMessage };

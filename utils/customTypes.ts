@@ -7,6 +7,12 @@ export const CustomBrowserContextOptions = {
   colorScheme: 'dark'
 };
 
+export type EnvironmentUserCreds = {
+  CLI_PROGAME_USERNAME: string | undefined;
+  CLI_PROGAME_EMAIL: string | undefined;
+  CLI_PROGAME_PW: string | undefined;
+};
+
 export type ConstructedBuildings = {
   metallmine: string;
   solarkraftwerk: string;

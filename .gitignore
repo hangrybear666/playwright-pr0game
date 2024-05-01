@@ -28,7 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Custom
-SessionCookies.json
+SessionCookies*.json
 reports/index.html
 /test-results/
 /playwright-report/

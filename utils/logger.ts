@@ -1,5 +1,11 @@
 import { Logger, createLogger, format, transports } from 'winston';
-import { sendBasicTelegramMessage, sendBuildingLevelsTelegramMessage, sendCurrentResourcesTelegramMessage, sendErrorTelegramMessage } from './telegramBot';
+import {
+  sendBasicTelegramMessage,
+  sendBuildingLevelsTelegramMessage,
+  sendCurrentResourcesTelegramMessage,
+  sendErrorTelegramMessage,
+  sendWarnTelegramMessage
+} from './telegramBot';
 const colorizer = format.colorize();
 const LEVEL = Symbol.for('level');
 
@@ -58,6 +64,16 @@ const logger = createLogger({
       stream: process.stdout,
       log(info, next) {
         sendBasicTelegramMessage(info.message);
+        next();
+      }
+    }),
+    // Filter and apply logic to only warn level.
+    new transports.Stream({
+      level: 'warn',
+      format: filterOnly('warn'),
+      stream: process.stdout,
+      log(info, next) {
+        sendWarnTelegramMessage(info.message);
         next();
       }
     }),

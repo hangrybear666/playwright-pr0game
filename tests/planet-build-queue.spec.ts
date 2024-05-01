@@ -8,11 +8,19 @@ import { parameters } from 'config/parameters';
 import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 import { RESEARCH_ORDER } from 'utils/build_orders/research-order';
 import { logger } from 'utils/logger';
+import { BUILD_ORDER } from 'utils/build_orders/build-order';
+
+const BUILT_ORDER_PATH = `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`;
+const RESEARCHED_ORDER_PATH = `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`;
 
 test('start main planet build queue', async ({ page }) => {
   try {
     await page.goto(process.env.PROGAME_UNI_RELATIVE_PATH!);
-    const userName = process.env.PROGAME_USERNAME!;
+    const userName = process.env.CLI_PROGAME_USERNAME
+      ? process.env.CLI_PROGAME_USERNAME
+      : process.env.PROGAME_USERNAME_DEFAULT
+        ? process.env.PROGAME_USERNAME_DEFAULT
+        : '';
     await expect(page.getByRole('link', { name: userName })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
     await expect(page.getByRole('link', { name: /Metall[0-9\.\s]/ })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT }); // Metall followed by whitespace, numbers or a dot
 
@@ -27,9 +35,8 @@ test('start main planet build queue', async ({ page }) => {
     //                              |_|
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   } catch (error: unknown) {
-    logger.error(error);
     if (error instanceof Error) {
-      // TODO handle error
+      logger.error(error.message);
     }
     throw error;
   }
@@ -53,7 +60,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
 
   // Merge original build with already built order
   let mergedBuildOrder: Building[];
-  mergedBuildOrder = mergeCurrentBuildOrderWithSource();
+  mergedBuildOrder = await mergeCurrentBuildOrderWithSource();
   const nextBuildingOrder = getNextBuildingOrder(mergedBuildOrder);
   const nextBuilding = mergedBuildOrder[nextBuildingOrder];
   if (nextBuilding.researchOverride) {
@@ -68,6 +75,27 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
     // recursively calls itself to run another round after research queue has been started
     recursiveCallCount++;
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+  }
+  //                              _                       _   _           _ _     _ _                   _               _     _
+  //     _____  ___ __   ___  ___| |_     _ __   _____  _| |_| |__  _   _(_) | __| (_)_ __   __ _      / |     _____  _(_)___| |_ ___
+  //    / _ \ \/ / '_ \ / _ \/ __| __|   | '_ \ / _ \ \/ / __| '_ \| | | | | |/ _` | | '_ \ / _` |_____| |    / _ \ \/ / / __| __/ __|
+  //   |  __/>  <| |_) |  __/ (__| |_    | | | |  __/>  <| |_| |_) | |_| | | | (_| | | | | | (_| |_____| |   |  __/>  <| \__ \ |_\__ \
+  //    \___/_/\_\ .__/ \___|\___|\__|   |_| |_|\___/_/\_\\__|_.__/ \__,_|_|_|\__,_|_|_| |_|\__, |     |_|    \___/_/\_\_|___/\__|___/
+  //             |_|                                                                        |___/
+  let existingBuildingErrorMsg = '';
+  const existingBuildingLevel = extractLevelFromBuildingHeader(currentBuildings[`${nextBuilding.name.toLowerCase()}`]);
+  if (nextBuilding.level > 1) {
+    // expect next building level to be current building level + 1
+    if (nextBuilding.level - 1 !== existingBuildingLevel) {
+      existingBuildingErrorMsg = `Next Building ${nextBuilding.name} ${nextBuilding.level} is not a level above: ${currentBuildings[`${nextBuilding.name.toLowerCase()}`]}`;
+      throw Error(existingBuildingErrorMsg);
+    }
+  } else if (nextBuilding.level === 1) {
+    // for level 1 builds, verify that the existing building does not contain a level number (Stufe x)
+    if (extractLevelFromBuildingHeader(currentBuildings[`${nextBuilding.name.toLowerCase()}`]) !== 0) {
+      existingBuildingErrorMsg = `Building ${nextBuilding.name} ${nextBuilding.level} failed because a building with higher level exists: ${currentBuildings[`${nextBuilding.name.toLowerCase()}`]}`;
+      throw Error(existingBuildingErrorMsg);
+    }
   }
 
   if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
@@ -246,7 +274,7 @@ async function waitForResearchToStart(
 
   // Merge original build with already built order
   let mergedResearchOrder: Research[];
-  mergedResearchOrder = mergeCurrentResearchOrderWithSource();
+  mergedResearchOrder = await mergeCurrentResearchOrderWithSource();
   const nextResearchOrder = getNextResearchOrder(mergedResearchOrder);
   const nextResearch = mergedResearchOrder[nextResearchOrder];
   const researchLabLevel = extractLevelFromBuildingHeader(currentBuildings.forschungslabor);
@@ -396,16 +424,19 @@ function getNextResearchOrder(allResearch: Research[]): number {
 }
 
 /**
+ * Asynchronous function that writes a file but does not wait for completion, unless a callback is specified.
  * Persists the updatedBuildOrder to storage as json file with 2 spaces as indentation for readability
  * @param {Building[]} updatedBuildOrder
  * @param {string} path
+ * @param {callback} writingFinished callback executed once file has been fully written
  */
-function writeJSONToFile(updatedBuildOrder: Building[] | Research[], path: string) {
+function writeJSONToFile(updatedBuildOrder: Building[] | Research[], path: string, writingFinished: () => void) {
   fs.writeFile(path, JSON.stringify(updatedBuildOrder, null, 2), (err) => {
     if (err) {
       logger.error("Couldn't write JSON file: ", err);
     } else {
       logger.verbose(`Updated construction log at: ${path}`);
+      writingFinished();
     }
   });
 }
@@ -421,10 +452,9 @@ function queueBuilding(index: number, buildOrder: Building[]) {
     if (!building.hasBeenQueued) {
       buildOrder[index].hasBeenQueued = true;
       buildOrder[index].queuedAt = new Date();
-      writeJSONToFile(
-        buildOrder,
-        `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
-      ); // Write updated data to JSON file
+      writeJSONToFile(buildOrder, BUILT_ORDER_PATH, () => {
+        // do not wait for json file to finish writing, we expect it to finish the next time it is required.
+      });
     } else {
       const errorMsg = 'Building has already been queued.';
       logger.error(errorMsg);
@@ -449,10 +479,9 @@ function queueResearch(index: number, queueOrder: Research[]) {
     if (!building.hasBeenQueued) {
       queueOrder[index].hasBeenQueued = true;
       queueOrder[index].queuedAt = new Date();
-      writeJSONToFile(
-        queueOrder,
-        `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`
-      ); // Write updated data to JSON file
+      writeJSONToFile(queueOrder, RESEARCHED_ORDER_PATH, () => {
+        // do not wait for json file to finish writing, we expect it to finish the next time it is required.
+      });
     } else {
       const errorMsg = 'Research has already been queued.';
       logger.error(errorMsg);
@@ -471,13 +500,22 @@ function queueResearch(index: number, queueOrder: Research[]) {
  * - queuedAt
  * @returns source build order with updated values for queued status
  */
-function mergeCurrentBuildOrderWithSource() {
-  const updatedBuildOrderData: Building[] = JSON.parse(
-    fs.readFileSync(
-      `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`,
-      'utf-8'
-    )
-  );
+async function mergeCurrentBuildOrderWithSource(): Promise<Building[]> {
+  try {
+    await import('.'.concat(BUILT_ORDER_PATH));
+  } catch (error: unknown) {
+    // no built-order found. Initializing to default
+    if (error instanceof Error) {
+      logger.warn(`No prior built order found. Initialized to default in path ${BUILT_ORDER_PATH}`);
+      await new Promise<void>((resolve) => {
+        // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
+        writeJSONToFile(BUILD_ORDER, BUILT_ORDER_PATH, () => {
+          resolve();
+        });
+      });
+    }
+  }
+  const updatedBuildOrderData: Building[] = JSON.parse(fs.readFileSync(BUILT_ORDER_PATH, 'utf-8'));
   const mergedBuildOrder: Building[] = ROBO_BUILD_ORDER.map((originalBuilding, index) => {
     let updatedBuilding;
     if (index < updatedBuildOrderData.length) {
@@ -502,13 +540,22 @@ function mergeCurrentBuildOrderWithSource() {
  * - queuedAt
  * @returns source research order with updated values for queued status
  */
-function mergeCurrentResearchOrderWithSource() {
-  const updatedResearchOrderData: Research[] = JSON.parse(
-    fs.readFileSync(
-      `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME ? '-' + process.env.PROGAME_USERNAME : ''}.json`,
-      'utf-8'
-    )
-  );
+async function mergeCurrentResearchOrderWithSource() {
+  try {
+    await import('.'.concat(RESEARCHED_ORDER_PATH));
+  } catch (error: unknown) {
+    // no built-order found. Initializing to default
+    if (error instanceof Error) {
+      logger.warn(`No prior researched order found. Initialized to default in path ${RESEARCHED_ORDER_PATH}`);
+      await new Promise<void>((resolve) => {
+        // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
+        writeJSONToFile(RESEARCH_ORDER, RESEARCHED_ORDER_PATH, () => {
+          resolve();
+        });
+      });
+    }
+  }
+  const updatedResearchOrderData: Research[] = JSON.parse(fs.readFileSync(RESEARCHED_ORDER_PATH, 'utf-8'));
   const mergedResearchOrder: Research[] = RESEARCH_ORDER.map((originalResearch, index) => {
     let updatedResearch;
     if (index < updatedResearchOrderData.length) {
