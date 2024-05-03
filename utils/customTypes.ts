@@ -1,3 +1,10 @@
+//  _____   _____   _____   _   _  ______
+// /  ___| |  ___| |_   _| | | | | | ___ \
+// \ `--.  | |__     | |   | | | | | |_/ /
+//  `--. \ |  __|    | |   | | | | |  __/
+// /\__/ / | |___    | |   | |_| | | |
+// \____/  \____/    \_/    \___/  \_|
+
 export const CustomBrowserContextOptions = {
   headless: false,
   viewport: { width: 1920, height: 1080 },
@@ -6,6 +13,13 @@ export const CustomBrowserContextOptions = {
   timezoneId: 'Europe/Berlin',
   colorScheme: 'dark'
 };
+
+//  _____   _   _   _____   _   _   _____
+// |  _  | | | | | |  ___| | | | | |  ___|
+// | | | | | | | | | |__   | | | | | |__
+// | | | | | | | | |  __|  | | | | |  __|
+// \ \/' / | |_| | | |___  | |_| | | |___
+//  \_/\_\  \___/  \____/   \___/  \____/
 
 export type EnvironmentUserCreds = {
   CLI_PROGAME_USERNAME: string | undefined;
@@ -85,4 +99,21 @@ export type Ship = BaseConstruct & {
 };
 export type Defense = BaseConstruct & {
   cost: BaseCost;
+};
+
+// _____   _____    ___    _____   _____
+// /  ___| |_   _|  / _ \  |_   _| /  ___|
+// \ `--.    | |   / /_\ \   | |   \ `--.
+//  `--. \   | |   |  _  |   | |    `--. \
+// /\__/ /   | |   | | | |   | |   /\__/ /
+// \____/    \_/   \_| |_/   \_/   \____/
+
+export type PlayerStatistics = {
+  name: string;
+  total: number;
+  buildings: number;
+  research: number;
+  fleet: number;
+  defense: number;
+  checkDate: Date;
 };

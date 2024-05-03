@@ -1150,8 +1150,8 @@
       "energyProduction": 190,
       "totalEnergyProduction": 1253
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T21:28:22.776Z",
     "constructionType": "building",
     "researchOverride": false
   },
