@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { logger } from 'utils/logger';
 import { parameters } from 'config/parameters';
 // import fs from 'fs';
-import jsdom from 'jsdom';
-import { PlayerStatistics } from 'utils/customTypes';
+import { PlayerStatistics, PointType } from 'utils/customTypes';
+import { randomDelay } from 'utils/sharedFunctions';
 
 test('extract points from statistics page', async ({ page }) => {
   try {
@@ -19,61 +19,30 @@ test('extract points from statistics page', async ({ page }) => {
     await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=statistics`, { timeout: parameters.ACTION_TIMEOUT });
     await expect(page.locator('form#stats:has-text("Statistiken")')).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
 
-    const lastUpdatedServerSide = await page.getByText('Statistiken (Aktualisiert').innerText({ timeout: parameters.ACTION_TIMEOUT });
-    logger.verbose('lastUpdatedServerSide : ' + lastUpdatedServerSide);
-    const statisticsHtml = await page.locator('#statistics > div.wrapper > content > table > tbody').innerHTML();
-    console.log(`
- _   _   _____   __  __   _
-| | | | |_   _| |  \/  | | |
-| |_| |   | |   | |\/| | | |
-|  _  |   | |   | |  | | | |___
-|_| |_|   |_|   |_|  |_| |_____|
-  `);
-    console.log(statisticsHtml);
-    const { JSDOM } = jsdom;
-    const statisticsDOM = new JSDOM(statisticsHtml);
-    console.log(`
-____      ___     __  __
-|  _ \    / _ \   |  \/  |
-| | | |  | | | |  | |\/| |
-| |_| |  | |_| |  | |  | |
-|____/    \___/   |_|  |_|
-   `);
-    console.log(statisticsDOM);
-    const statisticsDocument: Document = statisticsDOM.window.document;
-    console.log(`
-____   ___   ____ _   _ __  __ _____ _   _ _____
-|  _ \ / _ \ / ___| | | |  \/  | ____| \ | |_   _|
-| | | | | | | |   | | | | |\/| |  _| |  \| | | |
-| |_| | |_| | |___| |_| | |  | | |___| |\  | | |
-|____/ \___/ \____|\___/|_|  |_|_____|_| \_| |_|
-   `);
-    console.log(statisticsDocument);
-    const executionDate = new Date();
-    let playerStatistics: PlayerStatistics[] = [];
-    statisticsDocument.querySelectorAll('tr').forEach((row, index) => {
-      console.log('ROW');
-      console.log(row);
-      if (index === 0) {
-        // skip the header
-      } else {
-        const cells = row.querySelectorAll('td');
-        console.log('CELLS 0');
-        console.log(cells[0]);
-        console.log('CELLS 5');
-        console.log(cells[4]);
-        playerStatistics.push({
-          name: cells[0] && cells[0].textContent ? cells[0].textContent.trim() : '',
-          total: cells[cells.length - 1] ? Number(cells[cells.length - 1].textContent?.trim().replace('.', '')) : 0,
-          buildings: 0,
-          research: 0,
-          fleet: 0,
-          defense: 0,
-          checkDate: executionDate
-        });
+    const lastUpdatedServerSide: string = (await page.getByText('Statistiken (Aktualisiert').innerText({ timeout: parameters.ACTION_TIMEOUT }))
+      .split('am:')[1]
+      .split(')')[0]
+      .trim();
+    logger.verbose('Sever Refresh Time : ' + lastUpdatedServerSide);
+
+    let stats: PlayerStatistics[] = [];
+    stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, 'total');
+
+    const pointTypeSelectOptions = ['1']; // 1 = Punkte  3 = Forschung 4 = Gebäude
+    const pointBracketSelectOptions = ['1', '101', '201', '301', '401'];
+    async function processOptions() {
+      for (const pointType of pointTypeSelectOptions) {
+        await page.selectOption('select#type', pointType);
+        for (const bracket of pointBracketSelectOptions) {
+          // wait for a couple seconds between interactions
+          await new Promise((resolve) => setTimeout(resolve, 3000 + (Math.random() > 0.5 ? Math.random() * 1000 : Math.random() * -1000)));
+          await page.selectOption('select#range', bracket);
+          // extract points
+        }
       }
-    });
-    console.log(playerStatistics);
+    }
+    // await processOptions();
+    console.log(stats);
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(error.message);
@@ -81,3 +50,48 @@ ____   ___   ____ _   _ __  __ _____ _   _ _____
     throw error;
   }
 });
+
+/**
+ * page.evaluate takes javascript and executes it in the loaded browser context with access to document and window objects.
+ * A parameter of any type can be passed as the last argument and is accesible via a reference passed as the first function argument.
+ * @param {Page} page
+ * @param {PlayerStatistics[]} stats
+ * @param {string} lastUpdatedServerSide
+ * @param {} typeStr
+ * @returns
+ */
+async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics[], lastUpdatedServerSide: string, typeStr: PointType) {
+  return await page.evaluate(
+    ({ lastUpdatedServerSide, stats, typeStr }) => {
+      const executionDate = new Date();
+      document.querySelectorAll('#statistics > div.wrapper > content > table > tbody > tr').forEach((row, index) => {
+        if (index > 0) {
+          console.log(row);
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 2) {
+            switch (typeStr) {
+              case 'total':
+                stats.push({
+                  name: cells[1] && cells[1].textContent ? cells[1].textContent.split(/(\r\n|\r|\n)/)[0].trim() : '',
+                  rank: cells[0] ? Number(cells[0].textContent?.trim()) : 0,
+                  total: cells[cells.length - 1] ? Number(cells[cells.length - 1].textContent?.trim().replace('.', '')) : 0,
+                  buildings: 0,
+                  research: 0,
+                  fleet: 0,
+                  defense: 0,
+                  serverDate: lastUpdatedServerSide,
+                  checkDate: executionDate
+                });
+                break;
+
+              default:
+                break;
+            }
+          }
+        }
+      });
+      return stats;
+    },
+    { lastUpdatedServerSide, stats, typeStr }
+  );
+}

@@ -110,10 +110,14 @@ export type Defense = BaseConstruct & {
 
 export type PlayerStatistics = {
   name: string;
+  rank: number;
   total: number;
   buildings: number;
   research: number;
   fleet: number;
   defense: number;
+  serverDate: string;
   checkDate: Date;
 };
+
+export type PointType = 'total' | 'buildings' | 'research' | 'fleet' | 'defense';
