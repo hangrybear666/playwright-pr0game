@@ -6,6 +6,9 @@
 - Reinitialize Session after timeout within any interaction. Maybe by catching the error and calling the setup again.
 
 ### Medium Prio
+- Bei Raumschiffwerft Ausbau checken, dass keine Schiffe/Def in Bau ist. GGf. remaining time auslesen und abwarten.
+- Bei Schiffbau checken dass Werft nicht ausgebaut wird
+- Bei Def checken, dass Werft nicht ausgebaut wird
 - add resource deficit calculation to determine how long we have to wait before rechecking if resources are available.
 
 ### Low Prio

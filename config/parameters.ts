@@ -1,8 +1,8 @@
 export const parameters = {
   // minimum delay to wait between page interactions
-  RANDOM_INTERACTION_DELAY_MIN: 1000, // in ms
+  RANDOM_INTERACTION_DELAY_MIN: 2000, // in ms
   // maximum delay to wait between page interactions
-  RANDOM_INTERACTION_DELAY_MAX: 5000, // in ms
+  RANDOM_INTERACTION_DELAY_MAX: 6000, // in ms
 
   // builds can be started if not surpassing this energy deficit
   ENERGY_DEFICIT_ALLOWED: 50,
@@ -16,7 +16,7 @@ export const parameters = {
   // QUEUE_REFRESH_INTERVAL_VARIANCE: 22500, // in ms
 
   // base interval for checking if construction resources are available
-  RESOURCE_DEFICIT_RECHECK_INTERVAL: 600000, // in ms  // TODO weg
+  RESOURCE_DEFICIT_RECHECK_INTERVAL: 600000, // in ms
   // variance for checking if construction resources are available
-  RESOURCE_DEFICIT_RECHECK_VARIANCE: 60000 // in ms  // TODO weg
+  RESOURCE_DEFICIT_RECHECK_VARIANCE: 60000 // in ms
 };

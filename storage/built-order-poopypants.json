@@ -1120,8 +1120,8 @@
       "energy": 0
     },
     "constructionType": "research",
-    "hasBeenQueued": false,
-    "queuedAt": null
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T15:45:26.927Z"
   },
   {
     "order": 71,
@@ -1133,8 +1133,8 @@
       "deut": 400,
       "energy": 0
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T16:24:03.361Z",
     "constructionType": "building",
     "researchOverride": false
   },

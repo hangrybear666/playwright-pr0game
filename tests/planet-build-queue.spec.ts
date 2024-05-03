@@ -56,6 +56,7 @@ test('start main planet build queue', async ({ page }) => {
  * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
  */
 async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+  logger.verbose(`Building queue #${recursiveCallCount} initialized. Extracting current build levels and resources.`);
   // Extracts hourly resource production from resources page.
   const currentHourlyProduction = await extractHourlyResourceProduction(page);
   // Extracts headers (name and level) for various building types from the provided building page.
@@ -106,7 +107,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
 
   // navigate to building page fallback
   if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
-    logger.verbose('Navigating to building overview.');
+    logger.verbose('Navigating back to building overview (fallback).');
     await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
     await randomDelay(page); // wait a random time amount before page interaction
   } else {
@@ -128,6 +129,16 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       nextBuilding.cost.kris <= currentRes.krisAvailable &&
       nextBuilding.cost.deut <= currentRes.deutAvailable
     ) {
+      // log current buildings before clicking next building
+      let currentBuildingOverviewString: string = '';
+      Object.keys(currentBuildings).forEach((e, i, arr) => {
+        currentBuildingOverviewString += currentBuildings[e].concat(i < arr.length - 1 ? '\n' : '');
+      });
+      logger.buildingLevels(`${currentBuildingOverviewString}`);
+      // log current resources before clicking next building
+      logger.currentResources(
+        `Metall [${currentRes.metAvailable}]\nKristall [${currentRes.krisAvailable}] \nDeuterium [${currentRes.deutAvailable}]\nEnergie [${currentRes.energyAvailable}]`
+      );
       // Queue next Building
       await page.locator(`div.infos:has-text("${nextBuilding.name}") button.build_submit`).click({ timeout: parameters.ACTION_TIMEOUT });
       // Expect Queue to become visible
@@ -666,7 +677,7 @@ async function extractCurrentResourceCount(page: Page): Promise<Resources> {
   const krisAvailable = krisAmt ? parseInt(krisAmt) : 0;
   const deutAvailable = deutAmt ? parseInt(deutAmt) : 0;
   const energyAvailable = energieAmt ? parseInt(energieAmt) : 0;
-  logger.currentResources(`Metall [${metAvailable}]\nKristall [${krisAvailable}] \nDeuterium [${deutAvailable}]\nEnergie [${energyAvailable}]`);
+  logger.debug(`Metall [${metAvailable}]\nKristall [${krisAvailable}] \nDeuterium [${deutAvailable}]\nEnergie [${energyAvailable}]`);
   return { metAvailable, krisAvailable, deutAvailable, energyAvailable };
 }
 
@@ -756,7 +767,8 @@ async function extractCurrentBuildingLevels(page: Page): Promise<ConstructedBuil
   Object.keys(currentBuildings).forEach((e, i, arr) => {
     currentBuildingOverviewString += currentBuildings[e].concat(i < arr.length - 1 ? '\n' : '');
   });
-  logger.buildingLevels(`${currentBuildingOverviewString}`);
+  logger.debug(`${currentBuildingOverviewString}`);
+  logger.verbose('Extracted current buildings from building overview.');
   return currentBuildings;
 }
 
