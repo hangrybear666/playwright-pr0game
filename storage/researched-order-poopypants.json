@@ -57,6 +57,90 @@
   },
   {
     "order": 4,
+    "name": "Spionagetechnik",
+    "level": 1,
+    "cost": {
+      "met": 200,
+      "kris": 1000,
+      "deut": 200
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T09:34:30.151Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 5,
+    "name": "Spionagetechnik",
+    "level": 2,
+    "cost": {
+      "met": 400,
+      "kris": 2000,
+      "deut": 400
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T09:43:43.681Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 6,
+    "name": "Spionagetechnik",
+    "level": 3,
+    "cost": {
+      "met": 800,
+      "kris": 4000,
+      "deut": 800
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T10:01:54.934Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 7,
+    "name": "Spionagetechnik",
+    "level": 4,
+    "cost": {
+      "met": 1600,
+      "kris": 8000,
+      "deut": 1600
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T12:09:40.738Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 8,
+    "name": "Spionagetechnik",
+    "level": 5,
+    "cost": {
+      "met": 3200,
+      "kris": 16000,
+      "deut": 3200
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 9,
+    "name": "Spionagetechnik",
+    "level": 6,
+    "cost": {
+      "met": 6400,
+      "kris": 32000,
+      "deut": 6400
+    },
+    "minResearchlabLevel": 3,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 10,
     "name": "Impulstriebwerk",
     "level": 3,
     "cost": {
@@ -70,49 +154,7 @@
     "constructionType": "research"
   },
   {
-    "order": 5,
-    "name": "Spionagetechnik",
-    "level": 1,
-    "cost": {
-      "met": 200,
-      "kris": 1000,
-      "deut": 200
-    },
-    "minResearchlabLevel": 3,
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "research"
-  },
-  {
-    "order": 6,
-    "name": "Spionagetechnik",
-    "level": 2,
-    "cost": {
-      "met": 400,
-      "kris": 2000,
-      "deut": 400
-    },
-    "minResearchlabLevel": 3,
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "research"
-  },
-  {
-    "order": 7,
-    "name": "Spionagetechnik",
-    "level": 3,
-    "cost": {
-      "met": 800,
-      "kris": 4000,
-      "deut": 800
-    },
-    "minResearchlabLevel": 3,
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "research"
-  },
-  {
-    "order": 8,
+    "order": 11,
     "name": "Astrophysik",
     "level": 1,
     "cost": {
@@ -127,7 +169,7 @@
     "constructionType": "research"
   },
   {
-    "order": 9,
+    "order": 12,
     "name": "Astrophysik",
     "level": 2,
     "cost": {
@@ -142,7 +184,7 @@
     "constructionType": "research"
   },
   {
-    "order": 10,
+    "order": 13,
     "name": "Astrophysik",
     "level": 3,
     "cost": {

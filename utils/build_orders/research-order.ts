@@ -279,11 +279,14 @@ export const RESEARCH_ORDER: Research[] = [
   // Forschungslabor (Stufe 2/2)
   Impulstriebwerk(1),
   Impulstriebwerk(2),
-  Impulstriebwerk(3),
   // Forschungslabor (Stufe 3/3)
   Spionagetechnik(1),
   Spionagetechnik(2),
   Spionagetechnik(3),
+  Spionagetechnik(4),
+  Spionagetechnik(5),
+  Spionagetechnik(6),
+  Impulstriebwerk(3),
   Astrophysik(1),
   Astrophysik(2),
   Astrophysik(3)

@@ -95,9 +95,9 @@ function ResearchOverride(index: number) {
     researchOverride: true,
     level: RESEARCH_ORDER[index].level,
     cost: {
-      met: 0,
-      kris: 0,
-      deut: 0,
+      met: RESEARCH_ORDER[index].cost.met,
+      kris: RESEARCH_ORDER[index].cost.kris,
+      deut: RESEARCH_ORDER[index].cost.deut,
       energy: 0
     },
     constructionType: 'research'
@@ -400,6 +400,25 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: DeuteriumsynthetisiererCost(8)
   },
   {
+    name: 'Forschungslabor',
+    level: 3,
+    cost: ForschungslaborCost(3)
+  },
+  {
+    name: 'Kristallmine',
+    level: 11,
+    cost: KristallmineCost(11)
+  },
+  {
+    ...ResearchOverride(4)
+  },
+  {
+    ...ResearchOverride(5)
+  },
+  {
+    ...ResearchOverride(6)
+  },
+  {
     name: 'Metallspeicher',
     level: 2,
     cost: MetallspeicherCost(2)
@@ -408,6 +427,40 @@ export const ROBO_BUILD_ORDER: Building[] = [
     name: 'Kristallspeicher',
     level: 2,
     cost: KristallspeicherCost(2)
+  },
+  {
+    name: 'Forschungslabor',
+    level: 4,
+    cost: ForschungslaborCost(4)
+  },
+  {
+    ...ResearchOverride(7)
+  },
+  {
+    name: 'Deuteriumtank',
+    level: 2,
+    cost: DeuteriumtankCost(2)
+  },
+  {
+    name: 'Solarkraftwerk',
+    level: 15,
+    cost: SolarkraftwerkCost(15)
+  },
+  {
+    name: 'Kristallmine',
+    level: 12,
+    cost: KristallmineCost(12)
+  },
+  {
+    name: 'Kristallmine',
+    level: 13,
+    cost: KristallmineCost(13)
+  },
+  {
+    ...ResearchOverride(8)
+  },
+  {
+    ...ResearchOverride(9)
   }
 ].map((building, index) => ({
   order: index, // build order starting at 0 from array index

@@ -56,7 +56,7 @@ const logger = createLogger({
     // - Write all logs with importance level of `verbose` or less to `trace.log`
     new transports.File({ filename: 'logs/error.log', level: 'error' }),
     new transports.File({ filename: 'logs/info.log', level: 'info' }),
-    new transports.File({ filename: 'logs/trace.log', level: 'verbose' }),
+    new transports.File({ filename: 'logs/trace.log', level: 'debug' }),
     // Filter and apply logic to only error level.
     new transports.Stream({
       level: 'info',
@@ -109,7 +109,7 @@ const logger = createLogger({
     }),
     // Colorful Console logging for verbose and above.
     new transports.Console({
-      level: 'verbose', // error: 0, warn: 1, info: 2, http: 3, verbose: 4, debug: 5, silly: 6
+      level: 'verbose',
       format: format.combine(
         format.timestamp({
           format: 'YYYY-MM-DD HH:mm:ss'

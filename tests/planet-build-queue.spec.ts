@@ -45,8 +45,11 @@ test('start main planet build queue', async ({ page }) => {
 /**
  * Starts an infinite recursive loop acting as the building queue process based on available resources.
  * It merges the original Build oder with the written .json output build order created by this program.
- * Then it starts a build, updates the build order output file and checks in set intervals for build completion.
- * In between checks it occasionally interacts with the page in random intervals to mimick user interactions.
+ * Then it starts a build, updates the build order output file and recursively calls itself.
+ * - If the next construction is a building, it waits for the active queue.
+ * - Or it starts researching if the next construction is research.
+ * - Or it starts building ships if the next construction is a ship.
+ * - Or it starts building defense if the next construction is def.
  * @param {boolean} buildCompleted - Flag indicating if the build within this queue has completed.
  * @param {number} recursiveCallCount - The queue number starting at 0.
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
@@ -57,7 +60,8 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
   const currentBuildings = await extractCurrentBuildingLevels(page);
   // fetch current resources since they could have changed since last execution
   const currentRes = await extractCurrentResourceCount(page);
-
+  // randomly decides between several interactions to make the code less deterministic and obvious
+  await randomPlayerInteraction(page);
   // Merge original build with already built order
   let mergedBuildOrder: Building[];
   mergedBuildOrder = await mergeCurrentBuildOrderWithSource();
@@ -98,6 +102,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
     }
   }
 
+  // navigate to building page fallback
   if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
     logger.verbose('Navigating to building overview.');
     await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
@@ -108,7 +113,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
   }
 
   // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
-  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible();
+  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible({ timeout: parameters.ACTION_TIMEOUT });
   if (isQueueActive) {
     await waitForActiveQueue(page);
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
@@ -132,22 +137,20 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       // Marks the next building in line as queued and updates the .json output file
       queueBuilding(nextBuildingOrder, mergedBuildOrder);
       // Notifies user of successful queue addition
-      logger.info(`🏗 Next building added to queue: ${nextBuilding.name} Level ${nextBuilding.level}`);
+      logger.info(`🏗 Next building added to queue #${recursiveCallCount}: ${nextBuilding.name} Level ${nextBuilding.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0);
       // expects queue progressbar to have data-time attribute
       expect(Number(await page.locator('div#progressbar').getAttribute('data-time'))).toBeGreaterThan(0);
-      // Check building completion status in queue and call startBuildingQueue recursively after completion
-      await refreshUntilQueueCompletion(buildCompleted, recursiveCallCount, page);
-      //   _           _ _     _                              _      _           _
-      //  | |__  _   _(_) | __| |    ___ ___  _ __ ___  _ __ | | ___| |_ ___  __| |
-      //  | '_ \| | | | | |/ _` |   / __/ _ \| '_ ` _ \| '_ \| |/ _ \ __/ _ \/ _` |
-      //  | |_) | |_| | | | (_| |  | (_| (_) | | | | | | |_) | |  __/ ||  __/ (_| |
-      //  |_.__/ \__,_|_|_|\__,_|   \___\___/|_| |_| |_| .__/|_|\___|\__\___|\__,_|
-      //                                               |_|
-      // recursively calls itself to run another round after building queue completion
+      // Check building completion in continuous intervals and refresh page with optional user interactions until it has finished building.
+      // await refreshUntilQueueCompletion(true, buildCompleted, recursiveCallCount, page); // waitForActiveQueue achieves the same outcome without constant refreshes and user interaction spam.
+      //  _           _ _     _         _             _           _
+      // | |__  _   _(_) | __| |    ___| |_ __ _ _ __| |_ ___  __| |
+      // | '_ \| | | | | |/ _` |   / __| __/ _` | '__| __/ _ \/ _` |
+      // | |_) | |_| | | | (_| |   \__ \ || (_| | |  | ||  __/ (_| |
+      // |_.__/ \__,_|_|_|\__,_|   |___/\__\__,_|_|   \__\___|\__,_|
       recursiveCallCount++;
-      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page); // recursively calls itself to run another round.
     } else {
       const isMetMissing = nextBuilding.cost.met > currentRes.metAvailable;
       const isKrisMissing = nextBuilding.cost.kris > currentRes.krisAvailable;
@@ -161,10 +164,16 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       logger.verbose(
         // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in a couple minutes.
+        `Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in approximately ${parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL / 1000 / 60} minutes.
 Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
+
+      // TODO
+      // await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`);
+      // const metProductionPerHour = page.locator
+      // const krisProductionPerHour = 0
+      // const deutProductionPerHour = 0
       await new Promise<void>((resolve) => {
         setTimeout(
           () => {
@@ -189,9 +198,17 @@ Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
   }
 }
 
+/**
+ * Expects the progressbar (queue) to be visible.
+ * Extracts remaining queue time.
+ * Waits for the queue to resolve via Promise.
+ * Expects the progressbar (queue) to be hidden.
+ * @param page
+ */
 async function waitForActiveQueue(page: Page) {
   const queueCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
-  logger.info(`⏳ Active queue found. Waiting for ${queueCompletionTime} seconds.`);
+  const queuePositionOneName = await page.locator(`div#buildlist div:has-text("1.") button.build_submit`).innerText();
+  logger.info(`⏳ Active queue for ${queuePositionOneName} found. Waiting ${(queueCompletionTime / 60).toFixed(0)}min${queueCompletionTime % 60}s.`);
   await new Promise((resolve) => setTimeout(resolve, queueCompletionTime * 1000)); // Wait for queue to Complete
   await randomDelay(page); // wait a random time amount before page interaction
   await expect(page.locator(`div#buildlist div#progressbar`)).toBeHidden({
@@ -201,54 +218,63 @@ async function waitForActiveQueue(page: Page) {
 
 /**
  * Check building completion in continuous intervals until it has finished building.
+ * Adds random player interaction between refreshes.
+ * @param {boolean} enableUserInteractions Flag enabling  random player interactions (disable to avoid spamming the pr0game server).
  * @param {boolean} buildCompleted - Flag indicating if the build within this queue has completed.
  * @param {number} recursiveCallCount - The queue number starting at 0.
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
  */
-async function refreshUntilQueueCompletion(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
-  const buildCompletionTime: number = Number(await page.locator('div#progressbar').getAttribute('data-time'));
-  const queueRunning = new Promise((resolve, reject) => {
-    if (buildCompletionTime <= 0) reject(new Error('buildCompletionTime smaller than 1s: ' + buildCompletionTime));
-    setTimeout(() => {
-      resolve(`☑️ Build completed after ${buildCompletionTime}s`);
-    }, buildCompletionTime * 1000);
-  });
-  queueRunning.then(
-    (queueCompletionMsg) => {
-      // resolved
-      buildCompleted = true;
-      logger.info(queueCompletionMsg);
-    },
-    (error) => {
-      // rejected
-      if (error instanceof Error) logger.error(`Queue has not successfully finished running:  + ${error.message}`);
-      throw error;
-    }
-  );
-  // Checks for queue completion every QUEUE_REFRESH_INTERVAL +/- QUEUE_REFRESH_INTERVAL_VARIANCE miliseconds
-  let refreshIntervalId;
-  await new Promise<void>((resolve) => {
-    refreshIntervalId = setInterval(
-      async () => {
-        logger.verbose(`Checking if build in queue ${recursiveCallCount} has finished...`);
-        if (buildCompleted) {
-          logger.debug('ENTER RECURSIVE FUNCTION CALL');
-          resolve();
-        } else {
-          await randomPlayerInteraction(page);
-        }
-      },
-      parameters.QUEUE_REFRESH_INTERVAL +
-        Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.QUEUE_REFRESH_INTERVAL_VARIANCE : parameters.QUEUE_REFRESH_INTERVAL_VARIANCE))
-    );
-  });
-  // so there aren't any lingering intervals from prior queues spamming refreshes
-  clearInterval(refreshIntervalId);
-  buildCompleted = false;
-}
+// async function refreshUntilQueueCompletion(enableUserInteractions: boolean, buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+//   const buildCompletionTime = await page.locator('div#progressbar').getAttribute('data-time');
+//   const queueRunning = new Promise((resolve, reject) => {
+//     if (isNaN(Number(buildCompletionTime)) || Number(buildCompletionTime) <= 0)
+//       reject(new Error('buildCompletionTime is not a number above 1. Got: ' + buildCompletionTime));
+//     setTimeout(
+//       () => {
+//         resolve(`☑️ Build completed after ${buildCompletionTime}s`);
+//       },
+//       Number(buildCompletionTime) * 1000
+//     );
+//   });
+//   queueRunning.then(
+//     (queueCompletionMsg) => {
+//       // resolved
+//       buildCompleted = true;
+//       logger.info(queueCompletionMsg);
+//     },
+//     (error) => {
+//       // rejected
+//       if (error instanceof Error) logger.error(`Queue has not successfully finished running:  + ${error.message}`);
+//       throw error;
+//     }
+//   );
+//   // Checks for queue completion every QUEUE_REFRESH_INTERVAL +/- QUEUE_REFRESH_INTERVAL_VARIANCE miliseconds
+//   let refreshIntervalId;
+//   await new Promise<void>((resolve) => {
+//     refreshIntervalId = setInterval(
+//       async () => {
+//         logger.verbose(`Checking if build in queue ${recursiveCallCount} has finished...`);
+//         if (buildCompleted) {
+//           logger.debug('ENTER RECURSIVE FUNCTION CALL');
+//           resolve();
+//         } else {
+//           if (enableUserInteractions) {
+//             // only interacts with the pr0game server in between refreshes if the flag is set to true
+//             await randomPlayerInteraction(page);
+//           }
+//         }
+//       },
+//       parameters.QUEUE_REFRESH_INTERVAL +
+//         Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.QUEUE_REFRESH_INTERVAL_VARIANCE : parameters.QUEUE_REFRESH_INTERVAL_VARIANCE))
+//     );
+//   });
+//   // so there aren't any lingering intervals from prior queues spamming refreshes
+//   clearInterval(refreshIntervalId);
+//   buildCompleted = false;
+// }
 
 /**
- * Once research is initiazted, this function restarts the queue for as long as resources are missing.
+ * Starts the research after checking if the the research lab is not being upgraded and the research lab level is adequate.
  * @param {Page} page - The Playwright Page object representing the pr0game building page for interaction.
  * @param {boolean} buildCompleted - Flag indicating if the build within the initial building queue has completed.
  * @param {number} recursiveCallCount - The queue number of the initial building queue starting at 0.
@@ -265,8 +291,31 @@ async function waitForResearchToStart(
 ) {
   await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`, { timeout: parameters.ACTION_TIMEOUT });
 
-  // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
-  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible();
+  /**
+   * Check whether the Research Lab is being upgraded.
+   */
+  let isResearchLabUnderConstruction = await page.getByText('Das Forschungslabor wird zurzeit ausgebaut!').isVisible({ timeout: parameters.ACTION_TIMEOUT });
+  if (isResearchLabUnderConstruction) {
+    logger.debug('Research Lab being upgraded message encountered. Navigate to building page and check for active build.');
+    await randomDelay(page); // wait a random time amount before page interaction
+    await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
+    isResearchLabUnderConstruction = await page
+      .locator(`div#buildlist div:has-text("1."):has-text("Forschungslabor") button.build_submit`)
+      .isVisible({ timeout: parameters.ACTION_TIMEOUT });
+    if (isResearchLabUnderConstruction) {
+      // if building queue is still active after navigating to building page - wait for queue to end.
+      await waitForActiveQueue(page);
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+    } else {
+      // Research Lab construction has finished in the meantime - restart queue to extract new building level
+      await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+    }
+  }
+
+  /*
+   * in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
+   */
+  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible({ timeout: parameters.ACTION_TIMEOUT });
   if (isQueueActive) {
     await waitForActiveQueue(page);
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
@@ -321,8 +370,8 @@ async function waitForResearchToStart(
       logger.verbose(
         // Cost: Met [${nextResearch.cost.met}] Kris [${nextResearch.cost.kris}] Deut [${nextResearch.cost.deut}]
         // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in a couple minutes.
-  Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
+        `Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in approximately ${parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL / 1000 / 60} minutes.
+Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {
@@ -343,6 +392,7 @@ async function waitForResearchToStart(
       await startBuildingQueue(buildCompleted, recursiveCallCount, page);
     }
   } else {
+    // Research Lab Level requirement not met.
     const errorMsg = `Minimum Research Lab level [${nextResearch.minResearchlabLevel}] but existing is [${researchLabLevel}]`;
     logger.error(errorMsg);
     throw new Error(errorMsg);
@@ -350,11 +400,12 @@ async function waitForResearchToStart(
 }
 
 /**
- * simulates player interactions and is called in semi-random time amounts to not idle until queue completion.
+ * simulates player interactions and is ideally called in semi-random time amounts by the executing function.
  * @param page
  */
 async function randomPlayerInteraction(page: Page) {
   logger.verbose('Simulating erratic player interaction.');
+  await randomDelay(page); // wait a random time amount before page interaction
   const randomEvent = Math.floor(Math.random() * 7);
   switch (randomEvent) {
     case 1:
@@ -386,15 +437,21 @@ async function randomPlayerInteraction(page: Page) {
       await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`);
       break;
     default:
+      // in all other cases
       logger.verbose('Do Nothing.');
       break;
   }
+
+  await randomDelay(page); // wait a random time amount before page interaction
 }
 
 /**
  * loops through the build order and extracts next object that hasn't yet been queued.
  */
 function getNextBuildingOrder(allBuildings: Building[]): number {
+  if (allBuildings.filter((e) => e.hasBeenQueued === false).length === 0) {
+    throw Error('End of building queue reached. Please add more entries.');
+  }
   let order;
   allBuildings.every((e) => {
     if (!e.hasBeenQueued) {
@@ -411,6 +468,9 @@ function getNextBuildingOrder(allBuildings: Building[]): number {
  * loops through the research order and extracts next object that hasn't yet been queued.
  */
 function getNextResearchOrder(allResearch: Research[]): number {
+  if (allResearch.filter((e) => e.hasBeenQueued === false).length === 0) {
+    throw Error('End of building queue reached. Please add more entries.');
+  }
   let order;
   allResearch.every((e) => {
     if (!e.hasBeenQueued) {
