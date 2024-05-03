@@ -47,7 +47,7 @@ const logger = createLogger({
     format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss'
     }),
-    format.printf((info) => `${info.level}: ${info.message ? info.message.trim() : null} at ${info.timestamp}`)
+    format.printf((info) => `${info.level}: ${info.message ? String(info.message).trim() : null} at ${info.timestamp}`)
   ),
   // defaultMeta: { service: 'user-service' }, // define own metadata to be added
   transports: [
@@ -133,7 +133,7 @@ const logger = createLogger({
           }
         }),
         format.printf((info) => {
-          return `${info.level}: ${info.message ? info.message.trim() : null} at ${colorizer.colorize('timestamp', info.timestamp)}`;
+          return `${info.level}: ${info.message ? String(info.message).trim() : null} ${colorizer.colorize('timestamp', info.timestamp)}`;
         })
       )
     })

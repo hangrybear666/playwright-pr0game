@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
-import { extractLevelFromBuildingHeader, randomDelay } from 'utils/sharedFunctions';
+import { extractLevelFromBuildingHeader, extractResourcesPerHour, randomDelay } from 'utils/sharedFunctions';
 const jsdom = require('jsdom');
-import { Building, ConstructedBuildings, Research, Resources } from 'utils/customTypes';
+import { BaseCost, Building, ConstructedBuildings, Research, ResourceWaitTime, Resources, ResourcesHourly } from 'utils/customTypes';
 import fs from 'fs';
 import { parameters } from 'config/parameters';
 // import { BUILD_ORDER } from 'utils/build_orders/build-order';
@@ -56,6 +56,8 @@ test('start main planet build queue', async ({ page }) => {
  * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
  */
 async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: number, page: Page) {
+  // Extracts hourly resource production from resources page.
+  const currentHourlyProduction = await extractHourlyResourceProduction(page);
   // Extracts headers (name and level) for various building types from the provided building page.
   const currentBuildings = await extractCurrentBuildingLevels(page);
   // fetch current resources since they could have changed since last execution
@@ -73,7 +75,7 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
     //  | '__/ _ \/ __|/ _ \/ _` | '__/ __| '_ \    / _ \ \ / / _ \ '__| '__| |/ _` |/ _ \
     //  | | |  __/\__ \  __/ (_| | | | (__| | | |  | (_) \ V /  __/ |  | |  | | (_| |  __/
     //  |_|  \___||___/\___|\__,_|_|  \___|_| |_|   \___/ \_/ \___|_|  |_|  |_|\__,_|\___|
-    await waitForResearchToStart(page, buildCompleted, recursiveCallCount, currentRes, currentBuildings);
+    await waitForResearchToStart(page, buildCompleted, recursiveCallCount, currentRes, currentBuildings, currentHourlyProduction);
     // updates built-order with started research
     queueBuilding(nextBuildingOrder, mergedBuildOrder);
     // recursively calls itself to run another round after research queue has been started
@@ -158,29 +160,26 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       const missingMet = isMetMissing ? nextBuilding.cost.met - currentRes.metAvailable : 'none';
       const missingKris = isKrisMissing ? nextBuilding.cost.kris - currentRes.krisAvailable : 'none';
       const missingDeut = isDeutMissing ? nextBuilding.cost.deut - currentRes.deutAvailable : 'none';
+      const constructionCost: BaseCost = {
+        met: nextBuilding.cost.met,
+        kris: nextBuilding.cost.kris,
+        deut: nextBuilding.cost.deut
+      };
+      const resourceWaitSeconds: number = calculateResourceWaitTimeInSeconds(constructionCost, currentRes, currentHourlyProduction);
       logger.info(
-        `⏳ Waiting. ${nextBuilding.name} ${nextBuilding.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
+        `⏳ Waiting for ${(resourceWaitSeconds / 3600).toFixed(0)}hr${((resourceWaitSeconds % 3600) / 60).toFixed(0)}min${resourceWaitSeconds % 60}s. ${nextBuilding.name} ${nextBuilding.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
       );
-      logger.verbose(
-        // Cost: Met [${nextBuilding.cost.met}] Kris [${nextBuilding.cost.kris}] Deut [${nextBuilding.cost.deut}]
-        // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Waiting for resources for ${nextBuilding.name} ${nextBuilding.level}. Checking again in approximately ${parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL / 1000 / 60} minutes.
-Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
-      );
-      // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
-
-      // TODO
-      // await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`);
-      // const metProductionPerHour = page.locator
-      // const krisProductionPerHour = 0
-      // const deutProductionPerHour = 0
       await new Promise<void>((resolve) => {
         setTimeout(
           () => {
             resolve();
           },
-          parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
-            Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
+          resourceWaitSeconds && resourceWaitSeconds > 0
+            ? // calculated wait time + a couple seconds
+              resourceWaitSeconds * 1000 + 5000
+            : // fallback. timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
+              parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
+                Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
         );
       });
       //                 _               _                                                                  _ _       _     _ _ _ _
@@ -280,6 +279,7 @@ async function waitForActiveQueue(page: Page) {
  * @param {number} recursiveCallCount - The queue number of the initial building queue starting at 0.
  * @param {Resources} currentRes available resources
  * @param {ConstructedBuildings} currentBuildings available resources
+ * @param {ResourcesHourly} currentHourlyProduction resource production/hr
  * @throws {Error} - If there are any issues during the building queue process, such as resource unavailability or unexpected errors.
  */
 async function waitForResearchToStart(
@@ -287,7 +287,8 @@ async function waitForResearchToStart(
   buildCompleted: boolean,
   recursiveCallCount: number,
   currentRes: Resources,
-  currentBuildings: ConstructedBuildings
+  currentBuildings: ConstructedBuildings,
+  currentHourlyProduction: ResourcesHourly
 ) {
   await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=research`, { timeout: parameters.ACTION_TIMEOUT });
 
@@ -364,14 +365,15 @@ async function waitForResearchToStart(
       const missingMet = isMetMissing ? nextResearch.cost.met - currentRes.metAvailable : 'none';
       const missingKris = isKrisMissing ? nextResearch.cost.kris - currentRes.krisAvailable : 'none';
       const missingDeut = isDeutMissing ? nextResearch.cost.deut - currentRes.deutAvailable : 'none';
+
+      const constructionCost: BaseCost = {
+        met: nextResearch.cost.met,
+        kris: nextResearch.cost.kris,
+        deut: nextResearch.cost.deut
+      };
+      const resourceWaitSeconds: number = calculateResourceWaitTimeInSeconds(constructionCost, currentRes, currentHourlyProduction);
       logger.info(
-        `⏳ Waiting. ${nextResearch.name} ${nextResearch.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
-      );
-      logger.verbose(
-        // Cost: Met [${nextResearch.cost.met}] Kris [${nextResearch.cost.kris}] Deut [${nextResearch.cost.deut}]
-        // Available: Met [${metAvailable}] Kris [${krisAvailable}] Deut [${deutAvailable}]
-        `Waiting for resources for ${nextResearch.name} ${nextResearch.level}. Checking again in approximately ${parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL / 1000 / 60} minutes.
-Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
+        `⏳ Waiting for ${(resourceWaitSeconds / 3600).toFixed(0)}hr${((resourceWaitSeconds % 3600) / 60).toFixed(0)}min${resourceWaitSeconds % 60}s. ${nextResearch.name} ${nextResearch.level} requires ${isMetMissing ? missingMet + ' more Met' : ''}${isMetMissing && isKrisMissing ? ' and ' : ''}${isKrisMissing ? missingKris + ' more Kris' : ''}${isKrisMissing && !isDeutMissing ? '.' : ''}${isKrisMissing && isDeutMissing ? ' and ' : ''}${isDeutMissing ? missingDeut + ' more Deut.' : ''}`
       );
       // timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCE
       await new Promise<void>((resolve) => {
@@ -379,8 +381,11 @@ Missing: Met [${missingMet}] Kris [${missingKris}] Deut [${missingDeut}]`
           () => {
             resolve();
           },
-          parameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
-            Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
+          resourceWaitSeconds && resourceWaitSeconds > 0
+            ? // calculated wait time + a couple seconds
+              resourceWaitSeconds * 1000 + 5000
+            : // fallback. timeout of a couple minutes configured in RESOURCE_DEFICIT_RECHECK_INTERVAL +/- RESOURCE_DEFICIT_RECHECK_VARIANCEparameters.RESOURCE_DEFICIT_RECHECK_INTERVAL +
+              Math.floor(Math.random() * (Math.random() < 0.5 ? -parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE : parameters.RESOURCE_DEFICIT_RECHECK_VARIANCE)) // random variance of +/-30 seconds
         );
       });
       //                 _               _                                                                  _ _       _     _ _ _ _
@@ -639,11 +644,9 @@ async function mergeCurrentResearchOrderWithSource() {
  * @returns
  */
 async function extractCurrentResourceCount(page: Page): Promise<Resources> {
+  await randomDelay(page); // wait a random time amount before page interaction
   // navigate to empire instead of refreshing for current prices because page.reload is fucked in playwright
-  // await new Promise((resolve) => setTimeout(resolve, 2500)); // Add a delay of 2.5 seconds before page reload to avoid weird playwright behavior
   await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=Empire`, { timeout: parameters.ACTION_TIMEOUT });
-  // await new Promise((resolve) => setTimeout(resolve, 2500)); // Add a delay of 2.5 seconds before page reload to avoid weird playwright behavior
-  // wait for 2 seconds to avoid erratic behavior when extracting dom node attributes
   await expect(page.locator('#current_metal')).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
   const metAmt = await page.locator('#current_metal').getAttribute('data-real');
   const krisAmt = await page.locator('#current_crystal').getAttribute('data-real');
@@ -668,12 +671,33 @@ async function extractCurrentResourceCount(page: Page): Promise<Resources> {
 }
 
 /**
+ * Navigates to Resources page, extracts hourly resource production strings and transforms them to numbers.
+ * @param page
+ */
+async function extractHourlyResourceProduction(page: Page) {
+  await randomDelay(page); // wait a random time amount before page interaction
+  await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=resources`, { timeout: parameters.ACTION_TIMEOUT });
+  await expect(page.getByText('Rohstoffproduktion')).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
+  const currentHourlyProduction: ResourcesHourly = extractResourcesPerHour(
+    await page.locator('tr:has-text("Pro Stunde:") > td:nth-child(2) > span').innerText(),
+    await page.locator('tr:has-text("Pro Stunde:") > td:nth-child(3) > span').innerText(),
+    await page.locator('tr:has-text("Pro Stunde:") > td:nth-child(4) > span').innerText()
+  );
+  logger.debug('Met produced per hour: ' + currentHourlyProduction.metProduced);
+  logger.debug('Kris produced per hour: ' + currentHourlyProduction.krisProduced);
+  logger.debug('Deut produced per hour: ' + currentHourlyProduction.deutProduced);
+  logger.verbose('Extracted hourly production values from resource page.');
+  return currentHourlyProduction;
+}
+
+/**
  * Extracts headers (name and level) for various building types from the provided building page.
  * @param {Page} page - The Playwright Page object representing the webpage to extract from.
  * @throws {Error} - If there are any issues during the extraction process.
  * @returns {ConstructedBuildings} currentBuildings Object
  */
 async function extractCurrentBuildingLevels(page: Page): Promise<ConstructedBuildings> {
+  await randomDelay(page); // wait a random time amount before page interaction
   await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
   await expect(page.getByRole('button', { name: 'Rohstoffabbau' })).toBeVisible({ timeout: parameters.ACTION_TIMEOUT });
   const metallmineHeader = await page
@@ -734,4 +758,30 @@ async function extractCurrentBuildingLevels(page: Page): Promise<ConstructedBuil
   });
   logger.buildingLevels(`${currentBuildingOverviewString}`);
   return currentBuildings;
+}
+
+/**
+ * Receives cost of next construction, current resources and current hourly production to calculate the time to wait until checking for the next queue addition.
+ * @param {BaseCost} constructionCost cost of next construction
+ * @param {Resources} currentRes current held resources
+ * @param {ResourcesHourly} currentHourlyProduction current production/hr
+ * @returns
+ */
+function calculateResourceWaitTimeInSeconds(constructionCost: BaseCost, currentRes: Resources, currentHourlyProduction: ResourcesHourly) {
+  const resourceWaitTime: ResourceWaitTime = {
+    timeForMet:
+      constructionCost.met && constructionCost.met > 0
+        ? Math.ceil(((constructionCost.met - currentRes.metAvailable) / currentHourlyProduction.metProduced) * 3600)
+        : 0,
+    timeForKris:
+      constructionCost.kris && constructionCost.kris > 0
+        ? Math.ceil(((constructionCost.kris - currentRes.krisAvailable) / currentHourlyProduction.krisProduced) * 3600)
+        : 0,
+    timeForDeut:
+      constructionCost.deut && constructionCost.deut > 0
+        ? Math.ceil(((constructionCost.deut - currentRes.deutAvailable) / currentHourlyProduction.deutProduced) * 3600)
+        : 0
+  };
+  logger.debug('Calculated Resource Wait Time: ' + JSON.stringify(resourceWaitTime) + ' seconds.');
+  return Math.max(resourceWaitTime.timeForMet, resourceWaitTime.timeForKris, resourceWaitTime.timeForMet);
 }

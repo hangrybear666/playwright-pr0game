@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
 import { parameters } from 'config/parameters';
 import { logger } from './logger';
+import { ResourcesHourly } from './customTypes';
 
 export async function randomDelay(page: Page) {
   await page.waitForTimeout(getRandomDelayBetweenMiliseconds(parameters.RANDOM_INTERACTION_DELAY_MIN, parameters.RANDOM_INTERACTION_DELAY_MAX));
@@ -29,4 +30,13 @@ export function extractLevelFromBuildingHeader(str: string): number {
     logger.warn(`No Building Level found in ${str}. Defaulting to level 0.`);
     return 0;
   }
+}
+
+export function extractResourcesPerHour(metStr: string, krisStr: string, deutStr: string): ResourcesHourly {
+  const res = {
+    metProduced: metStr ? parseInt(metStr.trim().replace('.', '')) : 0,
+    krisProduced: krisStr ? parseInt(krisStr.trim().replace('.', '')) : 0,
+    deutProduced: deutStr ? parseInt(deutStr.trim().replace('.', '')) : 0
+  };
+  return res;
 }

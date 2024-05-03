@@ -113,6 +113,62 @@
   },
   {
     "order": 8,
+    "name": "Verbrennungstriebwerk",
+    "level": 1,
+    "cost": {
+      "met": 400,
+      "kris": 0,
+      "deut": 600
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T15:27:28.446Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 9,
+    "name": "Verbrennungstriebwerk",
+    "level": 2,
+    "cost": {
+      "met": 800,
+      "kris": 0,
+      "deut": 1200
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T15:30:14.057Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 10,
+    "name": "Verbrennungstriebwerk",
+    "level": 3,
+    "cost": {
+      "met": 1600,
+      "kris": 0,
+      "deut": 2400
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-03T15:35:21.414Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 11,
+    "name": "Verbrennungstriebwerk",
+    "level": 4,
+    "cost": {
+      "met": 3200,
+      "kris": 0,
+      "deut": 4800
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 12,
     "name": "Spionagetechnik",
     "level": 5,
     "cost": {
@@ -126,7 +182,7 @@
     "constructionType": "research"
   },
   {
-    "order": 9,
+    "order": 13,
     "name": "Spionagetechnik",
     "level": 6,
     "cost": {
@@ -140,7 +196,7 @@
     "constructionType": "research"
   },
   {
-    "order": 10,
+    "order": 14,
     "name": "Impulstriebwerk",
     "level": 3,
     "cost": {
@@ -154,7 +210,7 @@
     "constructionType": "research"
   },
   {
-    "order": 11,
+    "order": 15,
     "name": "Astrophysik",
     "level": 1,
     "cost": {
@@ -169,7 +225,7 @@
     "constructionType": "research"
   },
   {
-    "order": 12,
+    "order": 16,
     "name": "Astrophysik",
     "level": 2,
     "cost": {
@@ -184,7 +240,7 @@
     "constructionType": "research"
   },
   {
-    "order": 13,
+    "order": 17,
     "name": "Astrophysik",
     "level": 3,
     "cost": {

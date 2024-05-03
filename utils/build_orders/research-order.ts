@@ -99,17 +99,18 @@ function Energietechnik(level: number) {
 
 // Energietechnik (Stufe 0/1)
 // Forschungslabor (Stufe 0/1)
-// function Verbrennungstriebwerk(level: number) {
-//   return {
-//     name: 'Verbrennungstriebwerk',
-//     level: level,
-//     cost: {
-//       met: 0,
-//       kris: 0,
-//       deut: 0
-//     }
-//   };
-// }
+function Verbrennungstriebwerk(level: number) {
+  return {
+    name: 'Verbrennungstriebwerk',
+    level: level,
+    cost: {
+      met: 200 * Math.pow(2, level),
+      kris: 0,
+      deut: 300 * Math.pow(2, level)
+    },
+    minResearchlabLevel: 1
+  };
+}
 
 // Energietechnik (Stufe 0/1)
 // Forschungslabor (Stufe 0/2)
@@ -284,6 +285,10 @@ export const RESEARCH_ORDER: Research[] = [
   Spionagetechnik(2),
   Spionagetechnik(3),
   Spionagetechnik(4),
+  Verbrennungstriebwerk(1),
+  Verbrennungstriebwerk(2),
+  Verbrennungstriebwerk(3),
+  Verbrennungstriebwerk(4),
   Spionagetechnik(5),
   Spionagetechnik(6),
   Impulstriebwerk(3),

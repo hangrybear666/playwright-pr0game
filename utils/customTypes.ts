@@ -34,6 +34,18 @@ export type Resources = {
   energyAvailable: number;
 };
 
+export type ResourcesHourly = {
+  metProduced: number;
+  krisProduced: number;
+  deutProduced: number;
+};
+
+export type ResourceWaitTime = {
+  timeForMet: number;
+  timeForKris: number;
+  timeForDeut: number;
+};
+
 type BaseConstruct = {
   constructionType: string;
   order: number;
@@ -48,7 +60,7 @@ type BaseConstruct = {
   queuedAt: Date | null;
 };
 
-type BaseCost = {
+export type BaseCost = {
   met: number;
   kris: number;
   deut: number;

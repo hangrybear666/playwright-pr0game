@@ -442,6 +442,23 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: DeuteriumtankCost(2)
   },
   {
+    ...ResearchOverride(8)
+  },
+  {
+    ...ResearchOverride(9)
+  },
+  {
+    ...ResearchOverride(10)
+  },
+  {
+    ...ResearchOverride(11)
+  },
+  {
+    name: 'Raumschiffwerft',
+    level: 3,
+    cost: RaumschiffwerftCost(3)
+  },
+  {
     name: 'Solarkraftwerk',
     level: 15,
     cost: SolarkraftwerkCost(15)
@@ -457,10 +474,35 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: KristallmineCost(13)
   },
   {
-    ...ResearchOverride(8)
+    name: 'Metallspeicher',
+    level: 3,
+    cost: MetallspeicherCost(3)
   },
   {
-    ...ResearchOverride(9)
+    name: 'Kristallspeicher',
+    level: 3,
+    cost: KristallspeicherCost(3)
+  },
+  {
+    name: 'Solarkraftwerk',
+    level: 16,
+    cost: SolarkraftwerkCost(16)
+  },
+  {
+    name: 'Metallmine',
+    level: 13,
+    cost: MetallmineCost(13)
+  },
+  {
+    name: 'Metallmine',
+    level: 14,
+    cost: MetallmineCost(14)
+  },
+  {
+    ...ResearchOverride(12)
+  },
+  {
+    ...ResearchOverride(13)
   }
 ].map((building, index) => ({
   order: index, // build order starting at 0 from array index
