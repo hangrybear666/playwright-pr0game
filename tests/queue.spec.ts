@@ -83,6 +83,24 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
     recursiveCallCount++;
     await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   }
+
+  // navigate to building page fallback
+  if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
+    logger.verbose('Navigating back to building overview (fallback).');
+    await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
+    await randomDelay(page); // wait a random time amount before page interaction
+  } else {
+    logger.verbose(`Currently on building page. Attempting to queue next building ${nextBuilding.name} ${nextBuilding.level}.`);
+    await randomDelay(page); // wait a random time amount before page interaction
+  }
+
+  // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
+  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible({ timeout: parameters.ACTION_TIMEOUT });
+  if (isQueueActive) {
+    await waitForActiveQueue(page);
+    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
+  }
+
   //                              _                       _   _           _ _     _ _                   _               _     _
   //     _____  ___ __   ___  ___| |_     _ __   _____  _| |_| |__  _   _(_) | __| (_)_ __   __ _      / |     _____  _(_)___| |_ ___
   //    / _ \ \/ / '_ \ / _ \/ __| __|   | '_ \ / _ \ \/ / __| '_ \| | | | | |/ _` | | '_ \ / _` |_____| |    / _ \ \/ / / __| __/ __|
@@ -103,23 +121,6 @@ async function startBuildingQueue(buildCompleted: boolean, recursiveCallCount: n
       existingBuildingErrorMsg = `Building ${nextBuilding.name} ${nextBuilding.level} failed because a building with higher level exists: ${currentBuildings[`${nextBuilding.name.toLowerCase()}`]}`;
       throw Error(existingBuildingErrorMsg);
     }
-  }
-
-  // navigate to building page fallback
-  if (page.url() !== process.env.PROGAME_BUILDING_PAGE_URL) {
-    logger.verbose('Navigating back to building overview (fallback).');
-    await page.goto(`${process.env.PROGAME_UNI_RELATIVE_PATH}?page=buildings`, { timeout: parameters.ACTION_TIMEOUT });
-    await randomDelay(page); // wait a random time amount before page interaction
-  } else {
-    logger.verbose(`Currently on building page. Attempting to queue next building ${nextBuilding.name} ${nextBuilding.level}.`);
-    await randomDelay(page); // wait a random time amount before page interaction
-  }
-
-  // in case the test has restarted before the last queue finished executing, we have to wait for its completion and restart the queue to refresh resources.
-  const isQueueActive = await page.locator(`div#buildlist div#progressbar`).isVisible({ timeout: parameters.ACTION_TIMEOUT });
-  if (isQueueActive) {
-    await waitForActiveQueue(page);
-    await startBuildingQueue(buildCompleted, recursiveCallCount, page);
   }
 
   // Check for resource constraints
