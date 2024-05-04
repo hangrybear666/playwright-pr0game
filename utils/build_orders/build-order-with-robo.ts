@@ -479,6 +479,15 @@ export const ROBO_BUILD_ORDER: Building[] = [
     cost: MetallspeicherCost(3)
   },
   {
+    ...ResearchOverride(12)
+  },
+  {
+    ...ResearchOverride(13)
+  },
+  {
+    ...ResearchOverride(14)
+  },
+  {
     name: 'Kristallspeicher',
     level: 3,
     cost: KristallspeicherCost(3)
@@ -497,12 +506,6 @@ export const ROBO_BUILD_ORDER: Building[] = [
     name: 'Metallmine',
     level: 14,
     cost: MetallmineCost(14)
-  },
-  {
-    ...ResearchOverride(12)
-  },
-  {
-    ...ResearchOverride(13)
   }
 ].map((building, index) => ({
   order: index, // build order starting at 0 from array index

@@ -111,6 +111,10 @@ export type Defense = BaseConstruct & {
 export type PlayerStatistics = {
   name: string;
   rank: number;
+  buildingsRank: number;
+  researchRank: number;
+  fleetRank: number;
+  defenseRank: number;
   total: number;
   buildings: number;
   research: number;
@@ -119,5 +123,11 @@ export type PlayerStatistics = {
   serverDate: string;
   checkDate: Date;
 };
+
+export enum PointTypeEnum {
+  total = '1',
+  research = '3',
+  buildings = '4'
+}
 
 export type PointType = 'total' | 'buildings' | 'research' | 'fleet' | 'defense';

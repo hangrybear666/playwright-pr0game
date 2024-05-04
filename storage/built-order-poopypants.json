@@ -1182,8 +1182,8 @@
       "energy": 72,
       "totalEnergyConsumption": 449
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T11:10:41.610Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -1197,13 +1197,58 @@
       "deut": 0,
       "energy": 0
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T12:45:40.516Z",
     "constructionType": "building",
     "researchOverride": false
   },
   {
     "order": 76,
+    "name": "Spionagetechnik",
+    "researchOverride": true,
+    "level": 5,
+    "cost": {
+      "met": 3200,
+      "kris": 16000,
+      "deut": 3200,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T12:48:02.040Z"
+  },
+  {
+    "order": 77,
+    "name": "Verbrennungstriebwerk",
+    "researchOverride": true,
+    "level": 5,
+    "cost": {
+      "met": 6400,
+      "kris": 0,
+      "deut": 9600,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T18:55:02.911Z"
+  },
+  {
+    "order": 78,
+    "name": "Spionagetechnik",
+    "researchOverride": true,
+    "level": 6,
+    "cost": {
+      "met": 6400,
+      "kris": 32000,
+      "deut": 6400,
+      "energy": 0
+    },
+    "constructionType": "research",
+    "hasBeenQueued": false,
+    "queuedAt": null
+  },
+  {
+    "order": 79,
     "name": "Kristallspeicher",
     "level": 3,
     "cost": {
@@ -1218,7 +1263,7 @@
     "researchOverride": false
   },
   {
-    "order": 77,
+    "order": 80,
     "name": "Solarkraftwerk",
     "level": 16,
     "cost": {
@@ -1235,7 +1280,7 @@
     "researchOverride": false
   },
   {
-    "order": 78,
+    "order": 81,
     "name": "Metallmine",
     "level": 13,
     "cost": {
@@ -1251,7 +1296,7 @@
     "researchOverride": false
   },
   {
-    "order": 79,
+    "order": 82,
     "name": "Metallmine",
     "level": 14,
     "cost": {
@@ -1265,35 +1310,5 @@
     "queuedAt": null,
     "constructionType": "building",
     "researchOverride": false
-  },
-  {
-    "order": 80,
-    "name": "Spionagetechnik",
-    "researchOverride": true,
-    "level": 5,
-    "cost": {
-      "met": 3200,
-      "kris": 16000,
-      "deut": 3200,
-      "energy": 0
-    },
-    "constructionType": "research",
-    "hasBeenQueued": false,
-    "queuedAt": null
-  },
-  {
-    "order": 81,
-    "name": "Spionagetechnik",
-    "researchOverride": true,
-    "level": 6,
-    "cost": {
-      "met": 6400,
-      "kris": 32000,
-      "deut": 6400,
-      "energy": 0
-    },
-    "constructionType": "research",
-    "hasBeenQueued": false,
-    "queuedAt": null
   }
 ]

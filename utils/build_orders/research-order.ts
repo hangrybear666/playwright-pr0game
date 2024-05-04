@@ -290,8 +290,12 @@ export const RESEARCH_ORDER: Research[] = [
   Verbrennungstriebwerk(3),
   Verbrennungstriebwerk(4),
   Spionagetechnik(5),
+  Verbrennungstriebwerk(5),
   Spionagetechnik(6),
   Impulstriebwerk(3),
+  Energietechnik(2),
+  Verbrennungstriebwerk(6),
+  Energietechnik(3),
   Astrophysik(1),
   Astrophysik(2),
   Astrophysik(3)

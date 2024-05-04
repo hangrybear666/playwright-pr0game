@@ -177,12 +177,26 @@
       "deut": 3200
     },
     "minResearchlabLevel": 3,
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T12:48:01.966Z",
     "constructionType": "research"
   },
   {
     "order": 13,
+    "name": "Verbrennungstriebwerk",
+    "level": 5,
+    "cost": {
+      "met": 6400,
+      "kris": 0,
+      "deut": 9600
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T18:55:02.836Z",
+    "constructionType": "research"
+  },
+  {
+    "order": 14,
     "name": "Spionagetechnik",
     "level": 6,
     "cost": {
@@ -196,7 +210,7 @@
     "constructionType": "research"
   },
   {
-    "order": 14,
+    "order": 15,
     "name": "Impulstriebwerk",
     "level": 3,
     "cost": {
@@ -210,7 +224,49 @@
     "constructionType": "research"
   },
   {
-    "order": 15,
+    "order": 16,
+    "name": "Energietechnik",
+    "level": 2,
+    "cost": {
+      "met": 0,
+      "kris": 1600,
+      "deut": 800
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 17,
+    "name": "Verbrennungstriebwerk",
+    "level": 6,
+    "cost": {
+      "met": 12800,
+      "kris": 0,
+      "deut": 19200
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 18,
+    "name": "Energietechnik",
+    "level": 3,
+    "cost": {
+      "met": 0,
+      "kris": 3200,
+      "deut": 1600
+    },
+    "minResearchlabLevel": 1,
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "research"
+  },
+  {
+    "order": 19,
     "name": "Astrophysik",
     "level": 1,
     "cost": {
@@ -225,7 +281,7 @@
     "constructionType": "research"
   },
   {
-    "order": 16,
+    "order": 20,
     "name": "Astrophysik",
     "level": 2,
     "cost": {
@@ -240,7 +296,7 @@
     "constructionType": "research"
   },
   {
-    "order": 17,
+    "order": 21,
     "name": "Astrophysik",
     "level": 3,
     "cost": {

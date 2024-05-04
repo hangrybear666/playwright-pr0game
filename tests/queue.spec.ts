@@ -9,6 +9,7 @@ import { ROBO_BUILD_ORDER } from 'utils/build_orders/build-order-with-robo';
 import { RESEARCH_ORDER } from 'utils/build_orders/research-order';
 import { logger } from 'utils/logger';
 import { BUILD_ORDER } from 'utils/build_orders/build-order';
+import init from 'utils/pr0game-setup';
 
 const BUILT_ORDER_PATH = `./storage/built-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`;
 const RESEARCHED_ORDER_PATH = `./storage/researched-order${process.env.CLI_PROGAME_USERNAME ? '-' + process.env.CLI_PROGAME_USERNAME : process.env.PROGAME_USERNAME_DEFAULT ? '-' + process.env.PROGAME_USERNAME_DEFAULT : ''}.json`;
@@ -361,7 +362,7 @@ async function waitForResearchToStart(
       // Marks the next research in line as queued and updates the .json output file
       queueResearch(nextResearchOrder, mergedResearchOrder);
       // Notifies user of successful queue addition
-      logger.info(`🧬 Next research added to queue: ${nextResearch.name} Level ${nextResearch.level}`);
+      logger.info(`🧬 Next research added to queue #${recursiveCallCount}: ${nextResearch.name} Level ${nextResearch.level}`);
       // Expect Queue to not have more than one value - we are a machine running cuntinuously and don't need a queue
       await expect(page.locator(`div#buildlist div:has-text("2.")`)).toHaveCount(0, { timeout: parameters.ACTION_TIMEOUT });
       //                                     _            _             _           _
@@ -530,7 +531,7 @@ function queueBuilding(index: number, buildOrder: Building[]) {
       buildOrder[index].hasBeenQueued = true;
       buildOrder[index].queuedAt = new Date();
       writeJSONToFile(buildOrder, BUILT_ORDER_PATH, () => {
-        // do not wait for json file to finish writing, we expect it to finish the next time it is required.
+        // do not wait for json file to finish writing, we expect it to finish by the next time it is required.
       });
     } else {
       const errorMsg = 'Building has already been queued.';
@@ -557,7 +558,7 @@ function queueResearch(index: number, queueOrder: Research[]) {
       queueOrder[index].hasBeenQueued = true;
       queueOrder[index].queuedAt = new Date();
       writeJSONToFile(queueOrder, RESEARCHED_ORDER_PATH, () => {
-        // do not wait for json file to finish writing, we expect it to finish the next time it is required.
+        // do not wait for json file to finish writing, we expect it to finish by the next time it is required.
       });
     } else {
       const errorMsg = 'Research has already been queued.';
@@ -570,6 +571,7 @@ function queueResearch(index: number, queueOrder: Research[]) {
     throw Error(errorMsg);
   }
 }
+
 /**
  * Merges the original Build oder with the written .json output build order created by this program.
  * Updated values are:
