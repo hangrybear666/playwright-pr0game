@@ -25,22 +25,22 @@ test('extract points from statistics page', async ({ page }) => {
       .split('am:')[1]
       .split(')')[0]
       .trim();
-    logger.verbose('Sever Refresh Time : ' + lastUpdatedServerSide);
+    logger.verbose('Sever Refresh Time: ' + lastUpdatedServerSide);
     const executionDate = new Date();
 
     // await extractPlayerStatsFromPostRequest(page);
 
     // Import existing stats.json
-    let stats: PlayerStatistics[] = await loadExistingStats();
-    // let stats: PlayerStatistics[] = [];
+    // let stats: PlayerStatistics[] = await loadExistingStats();
+    let stats: PlayerStatistics[] = [];
     //                          _        _        _
     //   ___ _ __ __ ___      _| |   ___| |_ __ _| |_     _ __   __ _  __ _  ___
     //  / __| '__/ _` \ \ /\ / / |  / __| __/ _` | __|   | '_ \ / _` |/ _` |/ _ \
     // | (__| | | (_| |\ V  V /| |  \__ \ || (_| | |_    | |_) | (_| | (_| |  __/
     //  \___|_|  \__,_| \_/\_/ |_|  |___/\__\__,_|\__|   | .__/ \__,_|\__, |\___|
     //                                                   |_|          |___/
-    const pointTypeSelectOptions = [PointTypeEnum.total, PointTypeEnum.buildings, PointTypeEnum.research]; // 1 = Punkte  3 = Forschung 4 = Gebäude
-    const pointBracketSelectOptions = ['1', '101', '201', '301'];
+    const pointTypeSelectOptions = [PointTypeEnum.total, PointTypeEnum.fleet, PointTypeEnum.research, PointTypeEnum.buildings, PointTypeEnum.defense]; // 1 = Punkte 2 = Flotte 3 = Forschung 4 = Gebäude 5 = Verteidigung
+    const pointBracketSelectOptions = ['1', '101', '201', '301', '401'];
     async function iterateThroughRankings() {
       for (const pointType of pointTypeSelectOptions) {
         await page.selectOption('select#type', pointType);
@@ -52,23 +52,25 @@ test('extract points from statistics page', async ({ page }) => {
           // extract points
           switch (pointType) {
             case PointTypeEnum.total:
-              logger.verbose(`Extracting total points in bracket ${bracket}`);
+              logger.verbose(`🏆 Extracting total points in bracket ${bracket}`);
               stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'total');
               break;
             case PointTypeEnum.buildings:
-              logger.verbose(`Extracting buildings points in bracket ${bracket}`);
+              logger.verbose(`🏗 Extracting buildings points in bracket ${bracket}`);
               stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'buildings');
               break;
             case PointTypeEnum.research:
-              logger.verbose(`Extracting research points in bracket ${bracket}`);
+              logger.verbose(`🧬 Extracting research points in bracket ${bracket}`);
               stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'research');
               break;
-            // case PointTypeEnum.fleet:
-            //   stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'fleet');
-            //   break;
-            //   case PointTypeEnum.defense:
-            //     stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'defense');
-            //     break;
+            case PointTypeEnum.fleet:
+              logger.verbose(`🛩 Extracting fleet points in bracket ${bracket}`);
+              stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'fleet');
+              break;
+            case PointTypeEnum.defense:
+              logger.verbose(`🛡 Extracting defense points in bracket ${bracket}`);
+              stats = await extractPlayerStatisticsByType(page, stats, lastUpdatedServerSide, executionDate, 'defense');
+              break;
 
             default:
               break;
@@ -77,8 +79,7 @@ test('extract points from statistics page', async ({ page }) => {
       }
     }
     // start crawling
-    // await iterateThroughRankings();
-    console.log(stats);
+    await iterateThroughRankings();
 
     //                                          _        _          _
     //   _ __ ___   ___ _ __ __ _  ___      ___| |_ __ _| |_ ___   (_)___  ___  _ __
@@ -86,12 +87,12 @@ test('extract points from statistics page', async ({ page }) => {
     //  | | | | | |  __/ | | (_| |  __/    \__ \ || (_| | |_\__ \_ | \__ \ (_) | | | |
     //  |_| |_| |_|\___|_|  \__, |\___|    |___/\__\__,_|\__|___(_)/ |___/\___/|_| |_|
     //                      |___/                                |__/
-    // await new Promise<void>((resolve) => {
-    //   // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
-    //   writeJSONToFile(stats, './storage/stats.json', () => {
-    //     resolve();
-    //   });
-    // });
+    await new Promise<void>((resolve) => {
+      // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
+      writeJSONToFile(stats, lastUpdatedServerSide, './storage/stats.json', () => {
+        resolve();
+      });
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(error.message);
@@ -127,12 +128,12 @@ async function loadExistingStats() {
   return result;
 }
 
-function writeJSONToFile(stats: PlayerStatistics[], path: string, writingFinished: () => void) {
+function writeJSONToFile(stats: PlayerStatistics[], lastUpdatedServerSide: string, path: string, writingFinished: () => void) {
   fs.writeFile(path, JSON.stringify(stats, null, 2), (err) => {
     if (err) {
       logger.error("Couldn't write JSON file: ", err);
     } else {
-      logger.verbose(`Updated stats at: ${path}`);
+      logger.info(`☑️ Updated stats for ${lastUpdatedServerSide} at: ${path}`);
       writingFinished();
     }
   });
@@ -173,53 +174,68 @@ async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics
             //  \__, |  | |___ \__, |  \    |    \__/ |  \    |___ / \ | .__/  |  | | \| \__>    .__/  |  /~~\  |  .__/
             const isStatsInitialized = stats && stats.length > 0;
             // filter stats by name and checkDate of this playwright execution
-            const statsFilteredAndSorted = isStatsInitialized
-              ? stats.filter((e) => e.name === accName && e.serverDate === lastUpdatedServerSide).sort((a, b) => (a.checkDate > b.checkDate ? 1 : -1))
-              : null;
+            const statsFilteredAndSorted = isStatsInitialized ? stats.filter((e) => e.serverDate === lastUpdatedServerSide) : null;
             // set existingStat if match has been found
-            const existingStat = statsFilteredAndSorted && statsFilteredAndSorted.length > 0 ? statsFilteredAndSorted[0] : null;
+            const existingStats = statsFilteredAndSorted && statsFilteredAndSorted.length > 0 ? statsFilteredAndSorted[0] : null;
             // find index of existing stat
-            const existingStatIndex = existingStat ? stats.indexOf(existingStat) : -1;
+            const existingStatIndex = existingStats ? stats.indexOf(existingStats) : -1;
             const isStatIndexFound = existingStatIndex !== -1;
+            const existingPlayer = isStatIndexFound ? stats[existingStatIndex].children.filter((e) => e.name === accName)[0] : null;
+            const existingPlayerIndex = existingPlayer ? stats[existingStatIndex].children.indexOf(existingPlayer) : -1;
+            const isPlayerIndexFound = existingPlayerIndex !== -1;
             switch (typeStr) {
               case 'total':
-                if (isStatIndexFound) {
-                  stats[existingStatIndex].rank = accRank;
-                  stats[existingStatIndex].total = accPoints;
+                if (isStatIndexFound && isPlayerIndexFound) {
+                  stats[existingStatIndex].children[existingPlayerIndex].rank = accRank;
+                  stats[existingStatIndex].children[existingPlayerIndex].total = accPoints;
+                } else if (isStatIndexFound && !isPlayerIndexFound) {
+                  initializePlayerTotal(false, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 } else {
-                  initializePlayerTotal(stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                  initializePlayerTotal(true, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 }
                 break;
-              case 'buildings':
-                if (isStatIndexFound) {
-                  stats[existingStatIndex].buildingsRank = accRank;
-                  stats[existingStatIndex].buildings = accPoints;
-                } else {
-                  initializeBuildingsTotal(stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
-                }
-                break;
-              case 'research':
-                if (isStatIndexFound) {
-                  stats[existingStatIndex].researchRank = accRank;
-                  stats[existingStatIndex].research = accPoints;
-                } else {
-                  initializeResearchTotal(stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
-                }
-                break;
+
               case 'fleet':
-                if (isStatIndexFound) {
-                  stats[existingStatIndex].fleetRank = accRank;
-                  stats[existingStatIndex].fleet = accPoints;
+                if (isStatIndexFound && isPlayerIndexFound) {
+                  stats[existingStatIndex].children[existingPlayerIndex].fleetRank = accRank;
+                  stats[existingStatIndex].children[existingPlayerIndex].fleet = accPoints;
+                } else if (isStatIndexFound && !isPlayerIndexFound) {
+                  initializeFleetTotal(false, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 } else {
-                  initializeFleetTotal(stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                  initializeFleetTotal(true, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 }
                 break;
-              case 'defense':
-                if (isStatIndexFound) {
-                  stats[existingStatIndex].defenseRank = accRank;
-                  stats[existingStatIndex].defense = accPoints;
+
+              case 'research':
+                if (isStatIndexFound && isPlayerIndexFound) {
+                  stats[existingStatIndex].children[existingPlayerIndex].researchRank = accRank;
+                  stats[existingStatIndex].children[existingPlayerIndex].research = accPoints;
+                } else if (isStatIndexFound && !isPlayerIndexFound) {
+                  initializeResearchTotal(false, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 } else {
-                  initializeDefenseTotal(stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                  initializeResearchTotal(true, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                }
+                break;
+
+              case 'buildings':
+                if (isStatIndexFound && isPlayerIndexFound) {
+                  stats[existingStatIndex].children[existingPlayerIndex].buildingsRank = accRank;
+                  stats[existingStatIndex].children[existingPlayerIndex].buildings = accPoints;
+                } else if (isStatIndexFound && !isPlayerIndexFound) {
+                  initializeBuildingsTotal(false, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                } else {
+                  initializeBuildingsTotal(true, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                }
+                break;
+
+              case 'defense':
+                if (isStatIndexFound && isPlayerIndexFound) {
+                  stats[existingStatIndex].children[existingPlayerIndex].defenseRank = accRank;
+                  stats[existingStatIndex].children[existingPlayerIndex].defense = accPoints;
+                } else if (isStatIndexFound && !isPlayerIndexFound) {
+                  initializeDefenseTotal(false, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
+                } else {
+                  initializeDefenseTotal(true, existingStatIndex, stats, accName, accRank, accPoints, lastUpdatedServerSide, executionDate);
                 }
                 break;
               default:
@@ -234,6 +250,8 @@ async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics
       // | | | | | | |_| | (_| | | |/ /  __/   | (_) | | | |   |  _| | |  \__ \ |_    | (_| | (_| (_|  __/\__ \__ \
       // |_|_| |_|_|\__|_|\__,_|_|_/___\___|    \___/|_| |_|   |_| |_|_|  |___/\__|    \__,_|\___\___\___||___/___/
       function initializePlayerTotal(
+        firstInvocation: boolean,
+        existingStatsIndex: number,
         stats: PlayerStatistics[],
         accName: string,
         accRank: number,
@@ -241,71 +259,47 @@ async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics
         lastUpdatedServerSide: string,
         executionDate: Date
       ) {
-        stats.push({
-          name: accName,
-          rank: accRank,
-          buildingsRank: 0,
-          researchRank: 0,
-          fleetRank: 0,
-          defenseRank: 0,
-          total: accPoints,
-          buildings: 0,
-          research: 0,
-          fleet: 0,
-          defense: 0,
-          serverDate: lastUpdatedServerSide,
-          checkDate: executionDate
-        });
-      }
-      function initializeBuildingsTotal(
-        stats: PlayerStatistics[],
-        accName: string,
-        accRank: number,
-        accPoints: number,
-        lastUpdatedServerSide: string,
-        executionDate: Date
-      ) {
-        stats.push({
-          name: accName,
-          rank: 0,
-          buildingsRank: accRank,
-          researchRank: 0,
-          fleetRank: 0,
-          defenseRank: 0,
-          total: 0,
-          buildings: accPoints,
-          research: 0,
-          fleet: 0,
-          defense: 0,
-          serverDate: lastUpdatedServerSide,
-          checkDate: executionDate
-        });
-      }
-      function initializeResearchTotal(
-        stats: PlayerStatistics[],
-        accName: string,
-        accRank: number,
-        accPoints: number,
-        lastUpdatedServerSide: string,
-        executionDate: Date
-      ) {
-        stats.push({
-          name: accName,
-          rank: 0,
-          buildingsRank: 0,
-          researchRank: accRank,
-          fleetRank: 0,
-          defenseRank: 0,
-          total: 0,
-          buildings: 0,
-          research: accPoints,
-          fleet: 0,
-          defense: 0,
-          serverDate: lastUpdatedServerSide,
-          checkDate: executionDate
-        });
+        if (firstInvocation && existingStatsIndex === -1) {
+          stats.push({
+            serverDate: lastUpdatedServerSide,
+            checkDate: executionDate,
+            children: [
+              {
+                name: accName,
+                rank: accRank,
+                buildingsRank: 0,
+                researchRank: 0,
+                fleetRank: 0,
+                defenseRank: 0,
+                total: accPoints,
+                buildings: 0,
+                research: 0,
+                fleet: 0,
+                defense: 0
+              }
+            ]
+          });
+        } else if (!firstInvocation && existingStatsIndex !== -1) {
+          stats[existingStatsIndex].children.push({
+            name: accName,
+            rank: accRank,
+            buildingsRank: 0,
+            researchRank: 0,
+            fleetRank: 0,
+            defenseRank: 0,
+            total: accPoints,
+            buildings: 0,
+            research: 0,
+            fleet: 0,
+            defense: 0
+          });
+        } else {
+          throw Error('Initializing Player total failed');
+        }
       }
       function initializeFleetTotal(
+        firstInvocation: boolean,
+        existingStatsIndex: number,
         stats: PlayerStatistics[],
         accName: string,
         accRank: number,
@@ -313,23 +307,143 @@ async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics
         lastUpdatedServerSide: string,
         executionDate: Date
       ) {
-        stats.push({
-          name: accName,
-          rank: 0,
-          buildingsRank: 0,
-          researchRank: 0,
-          fleetRank: accRank,
-          defenseRank: 0,
-          total: 0,
-          buildings: 0,
-          research: 0,
-          fleet: accPoints,
-          defense: 0,
-          serverDate: lastUpdatedServerSide,
-          checkDate: executionDate
-        });
+        if (firstInvocation && existingStatsIndex === -1) {
+          stats.push({
+            serverDate: lastUpdatedServerSide,
+            checkDate: executionDate,
+            children: [
+              {
+                name: accName,
+                rank: 0,
+                buildingsRank: 0,
+                researchRank: 0,
+                fleetRank: accRank,
+                defenseRank: 0,
+                total: 0,
+                buildings: 0,
+                research: 0,
+                fleet: accPoints,
+                defense: 0
+              }
+            ]
+          });
+        } else if (!firstInvocation && existingStatsIndex !== -1) {
+          stats[existingStatsIndex].children.push({
+            name: accName,
+            rank: 0,
+            buildingsRank: 0,
+            researchRank: 0,
+            fleetRank: accRank,
+            defenseRank: 0,
+            total: 0,
+            buildings: 0,
+            research: 0,
+            fleet: accPoints,
+            defense: 0
+          });
+        } else {
+          throw Error('Initializing Player total failed');
+        }
+      }
+      function initializeResearchTotal(
+        firstInvocation: boolean,
+        existingStatsIndex: number,
+        stats: PlayerStatistics[],
+        accName: string,
+        accRank: number,
+        accPoints: number,
+        lastUpdatedServerSide: string,
+        executionDate: Date
+      ) {
+        if (firstInvocation && existingStatsIndex === -1) {
+          stats.push({
+            serverDate: lastUpdatedServerSide,
+            checkDate: executionDate,
+            children: [
+              {
+                name: accName,
+                rank: 0,
+                buildingsRank: 0,
+                researchRank: accRank,
+                fleetRank: 0,
+                defenseRank: 0,
+                total: 0,
+                buildings: 0,
+                research: accPoints,
+                fleet: 0,
+                defense: 0
+              }
+            ]
+          });
+        } else if (!firstInvocation && existingStatsIndex !== -1) {
+          stats[existingStatsIndex].children.push({
+            name: accName,
+            rank: 0,
+            buildingsRank: 0,
+            researchRank: accRank,
+            fleetRank: 0,
+            defenseRank: 0,
+            total: 0,
+            buildings: 0,
+            research: accPoints,
+            fleet: 0,
+            defense: 0
+          });
+        } else {
+          throw Error('Initializing Player total failed');
+        }
+      }
+      function initializeBuildingsTotal(
+        firstInvocation: boolean,
+        existingStatsIndex: number,
+        stats: PlayerStatistics[],
+        accName: string,
+        accRank: number,
+        accPoints: number,
+        lastUpdatedServerSide: string,
+        executionDate: Date
+      ) {
+        if (firstInvocation && existingStatsIndex === -1) {
+          stats.push({
+            serverDate: lastUpdatedServerSide,
+            checkDate: executionDate,
+            children: [
+              {
+                name: accName,
+                rank: 0,
+                buildingsRank: accRank,
+                researchRank: 0,
+                fleetRank: 0,
+                defenseRank: 0,
+                total: 0,
+                buildings: accPoints,
+                research: 0,
+                fleet: 0,
+                defense: 0
+              }
+            ]
+          });
+        } else if (!firstInvocation && existingStatsIndex !== -1) {
+          stats[existingStatsIndex].children.push({
+            name: accName,
+            rank: 0,
+            buildingsRank: accRank,
+            researchRank: 0,
+            fleetRank: 0,
+            defenseRank: 0,
+            total: 0,
+            buildings: accPoints,
+            research: 0,
+            fleet: 0,
+            defense: 0
+          });
+        } else {
+          throw Error('Initializing Player total failed');
+        }
       }
       function initializeDefenseTotal(
+        firstInvocation: boolean,
+        existingStatsIndex: number,
         stats: PlayerStatistics[],
         accName: string,
         accRank: number,
@@ -337,22 +451,45 @@ async function extractPlayerStatisticsByType(page: Page, stats: PlayerStatistics
         lastUpdatedServerSide: string,
         executionDate: Date
       ) {
-        stats.push({
-          name: accName,
-          rank: 0,
-          buildingsRank: 0,
-          researchRank: 0,
-          fleetRank: 0,
-          defenseRank: accRank,
-          total: 0,
-          buildings: 0,
-          research: 0,
-          fleet: 0,
-          defense: accPoints,
-          serverDate: lastUpdatedServerSide,
-          checkDate: executionDate
-        });
+        if (firstInvocation && existingStatsIndex === -1) {
+          stats.push({
+            serverDate: lastUpdatedServerSide,
+            checkDate: executionDate,
+            children: [
+              {
+                name: accName,
+                rank: 0,
+                buildingsRank: 0,
+                researchRank: 0,
+                fleetRank: 0,
+                defenseRank: accRank,
+                total: 0,
+                buildings: 0,
+                research: 0,
+                fleet: 0,
+                defense: accPoints
+              }
+            ]
+          });
+        } else if (!firstInvocation && existingStatsIndex !== -1) {
+          stats[existingStatsIndex].children.push({
+            name: accName,
+            rank: 0,
+            buildingsRank: 0,
+            researchRank: 0,
+            fleetRank: 0,
+            defenseRank: accRank,
+            total: 0,
+            buildings: 0,
+            research: 0,
+            fleet: 0,
+            defense: accPoints
+          });
+        } else {
+          throw Error('Initializing Player total failed');
+        }
       }
+
       //            _                                            _ _  __ _          _         _        _
       //   _ __ ___| |_ _   _ _ __ _ __      _ __ ___   ___   __| (_)/ _(_) ___  __| |    ___| |_ __ _| |_ ___
       //  | '__/ _ \ __| | | | '__| '_ \    | '_ ` _ \ / _ \ / _` | | |_| |/ _ \/ _` |   / __| __/ _` | __/ __|

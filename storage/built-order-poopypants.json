@@ -1264,6 +1264,22 @@
   },
   {
     "order": 80,
+    "name": "Metallmine",
+    "level": 13,
+    "cost": {
+      "met": 7785,
+      "kris": 1946,
+      "deut": 0,
+      "energy": 72,
+      "totalEnergyConsumption": 449
+    },
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-05T10:30:56.674Z",
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 81,
     "name": "Solarkraftwerk",
     "level": 16,
     "cost": {
@@ -1280,22 +1296,6 @@
     "researchOverride": false
   },
   {
-    "order": 81,
-    "name": "Metallmine",
-    "level": 13,
-    "cost": {
-      "met": 7785,
-      "kris": 1946,
-      "deut": 0,
-      "energy": 72,
-      "totalEnergyConsumption": 449
-    },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building",
-    "researchOverride": false
-  },
-  {
     "order": 82,
     "name": "Metallmine",
     "level": 14,
@@ -1305,6 +1305,22 @@
       "deut": 0,
       "energy": 83,
       "totalEnergyConsumption": 532
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 83,
+    "name": "Metallmine",
+    "level": 15,
+    "cost": {
+      "met": 17516,
+      "kris": 4379,
+      "deut": 0,
+      "energy": 95,
+      "totalEnergyConsumption": 627
     },
     "hasBeenQueued": false,
     "queuedAt": null,
