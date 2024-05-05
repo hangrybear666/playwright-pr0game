@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import { logger } from 'utils/logger';
 import { parameters } from 'config/parameters';
 import fs from 'fs';
-import { parse } from 'node-html-parser';
+// import { parse } from 'node-html-parser';
 import { PlayerStatistics, PointType, PointTypeEnum } from 'utils/customTypes';
 
 const STATS_JSON_PATH = `./storage/stats.json`;
@@ -30,9 +30,19 @@ test('extract points from statistics page', async ({ page }) => {
 
     // await extractPlayerStatsFromPostRequest(page);
 
-    // Import existing stats.json
-    // let stats: PlayerStatistics[] = await loadExistingStats();
-    let stats: PlayerStatistics[] = [];
+    let stats: PlayerStatistics[] = await loadExistingStats();
+    if (stats && stats.length > 0) {
+      if (stats.filter((e) => e.serverDate === lastUpdatedServerSide).length > 0) {
+        //                             _                _                  _   _                    __           _                _
+        //   _ __ ___ _ __   ___  __ _| |_     _____  _| |_ _ __ __ _  ___| |_(_) ___  _ __     ____\ \     __ _| |__   ___  _ __| |_
+        //  | '__/ _ \ '_ \ / _ \/ _` | __|   / _ \ \/ / __| '__/ _` |/ __| __| |/ _ \| '_ \   |_____\ \   / _` | '_ \ / _ \| '__| __|
+        //  | | |  __/ |_) |  __/ (_| | |_   |  __/>  <| |_| | | (_| | (__| |_| | (_) | | | |  |_____/ /  | (_| | |_) | (_) | |  | |_
+        //  |_|  \___| .__/ \___|\__,_|\__|   \___/_/\_\\__|_|  \__,_|\___|\__|_|\___/|_| |_|       /_/    \__,_|_.__/ \___/|_|   \__|
+        //           |_|
+        logger.warn(`Stats already extracted & persisted for ${lastUpdatedServerSide}`);
+        return;
+      }
+    }
     //                          _        _        _
     //   ___ _ __ __ ___      _| |   ___| |_ __ _| |_     _ __   __ _  __ _  ___
     //  / __| '__/ _` \ \ /\ / / |  / __| __/ _` | __|   | '_ \ / _` |/ _` |/ _ \
