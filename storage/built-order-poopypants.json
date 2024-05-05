@@ -1234,6 +1234,21 @@
   },
   {
     "order": 78,
+    "name": "Kristallspeicher",
+    "level": 3,
+    "cost": {
+      "met": 8000,
+      "kris": 4000,
+      "deut": 0,
+      "energy": 0
+    },
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-04T22:31:05.227Z",
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 79,
     "name": "Spionagetechnik",
     "researchOverride": true,
     "level": 6,
@@ -1244,23 +1259,8 @@
       "energy": 0
     },
     "constructionType": "research",
-    "hasBeenQueued": false,
-    "queuedAt": null
-  },
-  {
-    "order": 79,
-    "name": "Kristallspeicher",
-    "level": 3,
-    "cost": {
-      "met": 8000,
-      "kris": 4000,
-      "deut": 0,
-      "energy": 0
-    },
-    "hasBeenQueued": false,
-    "queuedAt": null,
-    "constructionType": "building",
-    "researchOverride": false
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-05T06:35:02.700Z"
   },
   {
     "order": 80,

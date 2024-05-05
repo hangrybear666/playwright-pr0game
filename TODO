@@ -15,6 +15,7 @@
 - Test what happens if I spam the REST API endpoint with multiple start commands
 - Make timeouts of expects work even though the test has no timeout itself. Either give each expect an individual timeout, or find a global solution.
 - Refactor app.ts routes into individual file and DRY too much in different routes.
+- Refactor queue to use node-html-parser instead of jsdom for energy extraction
 
 ### Bug Fixes
 - asd

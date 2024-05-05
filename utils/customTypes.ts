@@ -124,6 +124,24 @@ export type PlayerStatistics = {
   checkDate: Date;
 };
 
+// export type PlayerStatistics = {
+//   serverDate: Date;
+//   checkDate: Date;
+//   children: {
+//     name: string;
+//     rank: number;
+//     buildingsRank: number;
+//     researchRank: number;
+//     fleetRank: number;
+//     defenseRank: number;
+//     total: number;
+//     buildings: number;
+//     research: number;
+//     fleet: number;
+//     defense: number;
+//   };
+// };
+
 export enum PointTypeEnum {
   total = '1',
   research = '3',

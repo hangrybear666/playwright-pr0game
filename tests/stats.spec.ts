@@ -2,7 +2,10 @@ import { test, expect, Page } from '@playwright/test';
 import { logger } from 'utils/logger';
 import { parameters } from 'config/parameters';
 import fs from 'fs';
+import { parse } from 'node-html-parser';
 import { PlayerStatistics, PointType, PointTypeEnum } from 'utils/customTypes';
+
+const STATS_JSON_PATH = `./storage/stats.json`;
 
 test('extract points from statistics page', async ({ page }) => {
   try {
@@ -25,7 +28,17 @@ test('extract points from statistics page', async ({ page }) => {
     logger.verbose('Sever Refresh Time : ' + lastUpdatedServerSide);
     const executionDate = new Date();
 
-    let stats: PlayerStatistics[] = [];
+    // await extractPlayerStatsFromPostRequest(page);
+
+    // Import existing stats.json
+    let stats: PlayerStatistics[] = await loadExistingStats();
+    // let stats: PlayerStatistics[] = [];
+    //                          _        _        _
+    //   ___ _ __ __ ___      _| |   ___| |_ __ _| |_     _ __   __ _  __ _  ___
+    //  / __| '__/ _` \ \ /\ / / |  / __| __/ _` | __|   | '_ \ / _` |/ _` |/ _ \
+    // | (__| | | (_| |\ V  V /| |  \__ \ || (_| | |_    | |_) | (_| | (_| |  __/
+    //  \___|_|  \__,_| \_/\_/ |_|  |___/\__\__,_|\__|   | .__/ \__,_|\__, |\___|
+    //                                                   |_|          |___/
     const pointTypeSelectOptions = [PointTypeEnum.total, PointTypeEnum.buildings, PointTypeEnum.research]; // 1 = Punkte  3 = Forschung 4 = Gebäude
     const pointBracketSelectOptions = ['1', '101', '201', '301'];
     async function iterateThroughRankings() {
@@ -63,14 +76,22 @@ test('extract points from statistics page', async ({ page }) => {
         }
       }
     }
-    await iterateThroughRankings();
+    // start crawling
+    // await iterateThroughRankings();
     console.log(stats);
-    await new Promise<void>((resolve) => {
-      // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
-      writeJSONToFile(stats, './storage/stats.json', () => {
-        resolve();
-      });
-    });
+
+    //                                          _        _          _
+    //   _ __ ___   ___ _ __ __ _  ___      ___| |_ __ _| |_ ___   (_)___  ___  _ __
+    //  | '_ ` _ \ / _ \ '__/ _` |/ _ \    / __| __/ _` | __/ __|  | / __|/ _ \| '_ \
+    //  | | | | | |  __/ | | (_| |  __/    \__ \ || (_| | |_\__ \_ | \__ \ (_) | | | |
+    //  |_| |_| |_|\___|_|  \__, |\___|    |___/\__\__,_|\__|___(_)/ |___/\___/|_| |_|
+    //                      |___/                                |__/
+    // await new Promise<void>((resolve) => {
+    //   // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
+    //   writeJSONToFile(stats, './storage/stats.json', () => {
+    //     resolve();
+    //   });
+    // });
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(error.message);
@@ -78,6 +99,33 @@ test('extract points from statistics page', async ({ page }) => {
     throw error;
   }
 });
+
+// async function extractPlayerStatsFromPostRequest(page: Page) {
+//   const response = await page.request.post('https://pr0game.com/uni4/game.php?page=statistics', {
+//     form: { who: 1, type: 1, range: 1 }
+//     //   form: { who: 1, type: 3, range: 1 }
+//     //   form: { who: 1, type: 4, range: 1 }
+//   });
+//   const htmlText = await response.text();
+//   const parsedHtml = parse(htmlText);
+//   console.log(parsedHtml.querySelector('#statistics > div.wrapper > content > table.table519 > tr:nth-child(2) > td:nth-child(5)')?.toString());
+// }
+
+async function loadExistingStats() {
+  let result: PlayerStatistics[] | [];
+  try {
+    // ensure file exists before reading it from filesystem
+    await import('.'.concat(STATS_JSON_PATH)); // ! import requires 2 dots for relative navigation !
+    result = JSON.parse(fs.readFileSync(STATS_JSON_PATH, 'utf-8'));
+    logger.verbose(`Initialized stats from ${STATS_JSON_PATH}`);
+  } catch (error: unknown) {
+    result = [];
+    if (error instanceof Error) {
+      logger.warn(`No prior stats found. Initialized to empty array.`);
+    }
+  }
+  return result;
+}
 
 function writeJSONToFile(stats: PlayerStatistics[], path: string, writingFinished: () => void) {
   fs.writeFile(path, JSON.stringify(stats, null, 2), (err) => {

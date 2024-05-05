@@ -581,6 +581,7 @@ function queueResearch(index: number, queueOrder: Research[]) {
  */
 async function mergeCurrentBuildOrderWithSource(): Promise<Building[]> {
   try {
+    // ! import requires 2 dots for relative navigation !
     await import('.'.concat(BUILT_ORDER_PATH));
   } catch (error: unknown) {
     // no built-order found. Initializing to default
@@ -621,6 +622,7 @@ async function mergeCurrentBuildOrderWithSource(): Promise<Building[]> {
  */
 async function mergeCurrentResearchOrderWithSource() {
   try {
+    // ! import requires 2 dots for relative navigation !
     await import('.'.concat(RESEARCHED_ORDER_PATH));
   } catch (error: unknown) {
     // no built-order found. Initializing to default

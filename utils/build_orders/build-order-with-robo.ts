@@ -485,12 +485,12 @@ export const ROBO_BUILD_ORDER: Building[] = [
     ...ResearchOverride(13)
   },
   {
-    ...ResearchOverride(14)
-  },
-  {
     name: 'Kristallspeicher',
     level: 3,
     cost: KristallspeicherCost(3)
+  },
+  {
+    ...ResearchOverride(14)
   },
   {
     name: 'Solarkraftwerk',
