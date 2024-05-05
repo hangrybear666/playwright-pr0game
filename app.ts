@@ -105,7 +105,7 @@ app.listen(port, () => {
   console.log(`
 Server is running at address: http://localhost:${port}
 In order to start playwright execution GET url with correct password:
-http://localhost:3000/playwright/queue/:pw/:user_id?
+http://localhost:${port}/playwright/queue/:pw/:user_id?
 OR
-http://localhost:3000/playwright/stats/:pw/:user_id?`);
+http://localhost:${port}/playwright/stats/:pw/:user_id?`);
 });

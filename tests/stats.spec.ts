@@ -127,7 +127,7 @@ async function loadExistingStats() {
   try {
     // ensure file exists before reading it from filesystem
     await import('.'.concat(STATS_JSON_PATH)); // ! import requires 2 dots for relative navigation !
-    result = JSON.parse(fs.readFileSync(STATS_JSON_PATH, 'utf-8'));
+    result = await JSON.parse(fs.readFileSync(STATS_JSON_PATH, 'utf-8'));
     logger.verbose(`Initialized stats from ${STATS_JSON_PATH}`);
   } catch (error: unknown) {
     result = [];

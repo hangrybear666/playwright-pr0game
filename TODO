@@ -17,6 +17,7 @@
 - Make timeouts of expects work even though the test has no timeout itself. Either give each expect an individual timeout, or find a global solution.
 - Refactor app.ts routes into individual file and DRY too much in different routes.
 - Refactor queue to use node-html-parser instead of jsdom for energy extraction
+- ensure README is up2date and contains all necessary environment variables.
 
 ### Bug Fixes
 - asd

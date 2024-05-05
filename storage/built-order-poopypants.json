@@ -1290,8 +1290,8 @@
       "energyProduction": 217,
       "totalEnergyProduction": 1470
     },
-    "hasBeenQueued": false,
-    "queuedAt": null,
+    "hasBeenQueued": true,
+    "queuedAt": "2024-05-05T13:40:45.611Z",
     "constructionType": "building",
     "researchOverride": false
   },
@@ -1321,6 +1321,36 @@
       "deut": 0,
       "energy": 95,
       "totalEnergyConsumption": 627
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 84,
+    "name": "Roboterfabrik",
+    "level": 4,
+    "cost": {
+      "met": 3200,
+      "kris": 960,
+      "deut": 1600,
+      "energy": 0
+    },
+    "hasBeenQueued": false,
+    "queuedAt": null,
+    "constructionType": "building",
+    "researchOverride": false
+  },
+  {
+    "order": 85,
+    "name": "Roboterfabrik",
+    "level": 5,
+    "cost": {
+      "met": 6400,
+      "kris": 1920,
+      "deut": 3200,
+      "energy": 0
     },
     "hasBeenQueued": false,
     "queuedAt": null,
