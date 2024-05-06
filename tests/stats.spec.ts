@@ -5,7 +5,7 @@ import fs from 'fs';
 // import { parse } from 'node-html-parser';
 import { PlayerStatistics, PointType, PointTypeEnum } from 'utils/customTypes';
 
-const STATS_JSON_PATH = `./storage/stats.json`;
+const STATS_JSON_PATH = `./storage/player-stats.json`;
 
 test('extract points from statistics page', async ({ page }) => {
   try {
@@ -99,7 +99,7 @@ test('extract points from statistics page', async ({ page }) => {
     //                      |___/                                |__/
     await new Promise<void>((resolve) => {
       // fs.writeFile is asynchronous, so we have to wait for writing to complete before reading it from filesystem
-      writeJSONToFile(stats, lastUpdatedServerSide, './storage/stats.json', () => {
+      writeJSONToFile(stats, lastUpdatedServerSide, STATS_JSON_PATH, () => {
         resolve();
       });
     });
