@@ -2,6 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import { logger } from 'utils/logger';
 import { parameters } from 'config/parameters';
 import fs from 'fs';
+import axios from 'axios';
 // import { parse } from 'node-html-parser';
 import { PlayerStatistics, PointType, PointTypeEnum } from 'utils/customTypes';
 
@@ -103,6 +104,18 @@ test('extract points from statistics page', async ({ page }) => {
         resolve();
       });
     });
+    //                             _           _        _
+    //   _____  ___ __   ___  _ __| |_     ___| |_ __ _| |_ ___
+    //  / _ \ \/ / '_ \ / _ \| '__| __|   / __| __/ _` | __/ __|
+    // |  __/>  <| |_) | (_) | |  | |_    \__ \ || (_| | |_\__ \
+    //  \___/_/\_\ .__/ \___/|_|   \__|   |___/\__\__,_|\__|___/
+    //           |_|
+    const exportStatus = await postPlayerStatisticsExternally(stats);
+    if (exportStatus === 202) {
+      logger.info(`☑️ Successfully exported player-stats.json to external Server.`);
+    } else {
+      logger.warn(`Couldn't export player-stats.json to external server.`);
+    }
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(error.message);
@@ -121,6 +134,24 @@ test('extract points from statistics page', async ({ page }) => {
 //   const parsedHtml = parse(htmlText);
 //   console.log(parsedHtml.querySelector('#statistics > div.wrapper > content > table.table519 > tr:nth-child(2) > td:nth-child(5)')?.toString());
 // }
+
+/**
+ * Sends the generated Player statistics to an external server.
+ * @param {PlayerStatistics[]} stats
+ * @returns username associated with updated row
+ */
+export const postPlayerStatisticsExternally = async (stats: PlayerStatistics[]) => {
+  const postUrl = `${process.env.STAT_EXPORT_SERVER_URL}${process.env.REST_PW}`;
+  try {
+    const config = {
+      // headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(postUrl, stats, config);
+    return response.status;
+  } catch (error) {
+    throw error;
+  }
+};
 
 async function loadExistingStats() {
   let result: PlayerStatistics[] | [];

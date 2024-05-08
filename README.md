@@ -2,8 +2,9 @@
 
 ## Overview
 
-This project is an Express server written in TypeScript that utilizes Playwright for browser automation. It enables continuous and autonomous gameplay of the browser game pr0game.
-It employs an Express server with fs middleware to handle HTTP requests, save .json files and a Telegram chatbot for user communication.
+This project is an Express server written in TypeScript that utilizes Playwright for browser automation. It enables continuous and autonomous gameplay of the browser game pr0game. It is able to construct buildings, queue researches, build ships and defense.
+It can colloect player stats in regular interval and export them as .json files.
+User Notifications of executed tasks is handled via Telegram Chatbot.
 
 ## Table of Contents
 
@@ -23,6 +24,7 @@ It employs an Express server with fs middleware to handle HTTP requests, save .j
 - **Morgan:** HTTP request logger middleware for Node.js.
 - **node-telegram-bot-api:** Telegram Bot API wrapper.
 - **winston:** Logging library for Node.js.
+- **Axios:** A promise-based HTTP client for exporting generated .json files via HTTP POST requests to an external server.
 - **Nodemon:** Hot Reload upon file changes of the server during development, enhancing the development workflow.
 - **ts-node:** Executing TypeScript files directly without the need for compilation, enhancing the development workflow.
 - **ESLint and Prettier:** Linter and Formatter for ensuring code quality and enforcing coding standards.
@@ -65,6 +67,7 @@ npm install
      - TELEGRAM_BOT_USERNAME=
      - TELEGRAM_USER_CHAT_ID=
      - REST_PW=
+     - STAT_EXPORT_SERVER_URL=
      - PROGAME_USERNAME_DEFAULT=
      - PROGAME_EMAIL_DEFAULT=
      - PROGAME_PW_DEFAULT=
