@@ -59,7 +59,7 @@ test('extract points from statistics page', async ({ page }) => {
           // wait for a couple seconds between interactions
           await page.selectOption('select#range', bracket);
           expect((await page.locator('#range option[selected]').getAttribute('value')) === bracket);
-          await new Promise((resolve) => setTimeout(resolve, 3000 + (Math.random() > 0.5 ? Math.random() * 1000 : Math.random() * -1000)));
+          await new Promise((resolve) => setTimeout(resolve, 5000 + (Math.random() > 0.5 ? Math.random() * 1000 : Math.random() * -1000)));
           // extract points
           switch (pointType) {
             case PointTypeEnum.total:

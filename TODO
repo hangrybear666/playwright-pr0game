@@ -9,7 +9,6 @@
 - Bei Raumschiffwerft Ausbau checken, dass keine Schiffe/Def in Bau ist. GGf. remaining time auslesen und abwarten.
 - Bei Schiffbau checken dass Werft nicht ausgebaut wird
 - Bei Def checken, dass Werft nicht ausgebaut wird
-- add resource deficit calculation to determine how long we have to wait before rechecking if resources are available.
 - Refactor build-order to include name and level directly in the function, so the build-order is clean
 
 ### Low Prio
