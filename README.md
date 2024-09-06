@@ -1,4 +1,4 @@
-# Express/Playwright pr0game Automation
+# Express/Playwright Browser Automation Bot
 
 ## Overview
 
