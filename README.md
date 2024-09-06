@@ -19,8 +19,6 @@ User Notifications of executed tasks is handled via Telegram Chatbot.
 - **Playwright:** Browser automation library for automating browser tasks.
 - **Express:** A minimalist web framework for Node.js.
 - **Node.js:** JavaScript runtime environment.
-- **dotenv:** Module for loading environment variables.
-- **fs:** File system module for Node.js.
 - **Morgan:** HTTP request logger middleware for Node.js.
 - **node-telegram-bot-api:** Telegram Bot API wrapper.
 - **winston:** Logging library for Node.js.
